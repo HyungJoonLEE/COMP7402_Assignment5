@@ -175,8 +175,9 @@ void User::setRoundKeys(bool r) {
 
 
 void User::setPredefinedRoundKeys() {
-    _roundKeys = PREDEFINED_ROUND_KEYS;
-    printRoundKeys();
+    unsigned int tempKeys[] = PREDEFINED_ROUND_KEYS;
+    _roundKeys.clear();
+    _roundKeys.insert(_roundKeys.end(), begin(tempKeys), end(tempKeys));
 }
 
 
@@ -302,8 +303,9 @@ void User::generateRandomPassword(int length) {
 }
 
 
-
-
-
-
-
+void User::inputProcess() {
+    srand(static_cast<unsigned int>(time(0)));
+    askEncryptMode();
+    askInOutFileType();
+    askRoundKeyType();
+}

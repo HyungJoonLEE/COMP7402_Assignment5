@@ -16,7 +16,6 @@ enum keyFlag {
 #define PREDEFINED_ROUND_KEYS {0xdddddddd, 0xeeeeeeee, 0xaaaaaaaa, 0xdddddddd, \
                                0xbbbbbbbb, 0xeeeeeeee, 0xeeeeeeee, 0xffffffff}
 
-
 using namespace std;
 
 class User {
@@ -30,9 +29,8 @@ private:
     int _roundNum;
     string _password;
     vector<unsigned int> _roundKeys;
-    void generateRandomPassword(int length);
 
-public:
+    void generateRandomPassword(int length);
     void askEncryptType();
     void askEncryptMode();
     void askInOutFileType();
@@ -45,6 +43,8 @@ public:
     int askPasswordLength();
     void askPersonalPassword(int pl);
     void askPasswordOption(int pl);
+public:
+    void inputProcess();
 };
 
 #endif //COMP7402_ASSIGNMENT5_USER_H

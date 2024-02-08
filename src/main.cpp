@@ -2,11 +2,7 @@
 
 int main() {
     User user;
-    srand(static_cast<unsigned int>(time(0)));
-
-    user.askEncryptMode();
-    user.askInOutFileType();
-    user.askRoundKeyType();
+    user.inputProcess();
 
 
 
