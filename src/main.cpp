@@ -1,10 +1,14 @@
-#include "User.h"
+#include "ECB.h"
 
 int main() {
     User user;
-    user.askEncryptType();
+    srand(static_cast<unsigned int>(time(0)));
+
+    user.askEncryptMode();
     user.askInOutFileType();
     user.askRoundKeyType();
+
+
 
 
     return 0;
