@@ -5,8 +5,8 @@ void User::askEncryptType() {
 
     while (true) {
         cout << "Please choose a encrypt type:" << endl;
-        cout << "1. ECB (Data Encryption Standard)" << endl;
-        cout << "2. ECB (Advanced Encryption Standard)" << endl;
+        cout << "1. DES (Data Encryption Standard)" << endl;
+        cout << "2. AES (Advanced Encryption Standard)" << endl;
         cout << ">> ";
         cin >> choice;
 
@@ -19,12 +19,12 @@ void User::askEncryptType() {
 
         switch (choice) {
             case 1:
-                cout << "[ Chose ECB mode ]\n" << endl;
-                _type = "ECB";
+                cout << "[ Chose DES mode ]\n" << endl;
+                type_ = DES_;
                 return;
             case 2:
-                cout << "[ Chose ECB mode ]\n" << endl;
-                _type = "ECB";
+                cout << "[ Chose AES mode ]\n" << endl;
+                type_ = AES_;
                 return;
             default:
                 cout << "Invalid input\n" << endl;
@@ -55,12 +55,12 @@ void User::askEncryptMode() {
         switch (choice) {
             case 1:
                 cout << "[ Chose ECB mode ]\n" << endl;
-                _mode = "ECB";
+                mode_ = "ECB";
                 askPasswordOption(askPasswordLength());
                 return;
             case 2:
                 cout << "[ Chose CBC mode ]\n" << endl;
-                _mode = "CBC";
+                mode_ = "CBC";
                 return;
             default:
                 cout << "Invalid input\n" << endl;
@@ -75,8 +75,8 @@ void User::askInOutFileType() {
 
     while(true) {
         cout << "Please choose input data type: " << endl;
-        cout << "1. File " << endl;
-        cout << "2. Plaintext " << endl;
+        cout << "1. Plaintext " << endl;
+        cout << "2. File " << endl;
         cout << ">> ";
         cin >> choice;
 
@@ -89,27 +89,26 @@ void User::askInOutFileType() {
 
         switch (choice) {
             case 1:
-                _keyboard = false;
+                ptMode_ = true;
+                cout << "[ Chose Plaintext mode ]\n" << endl;
+                cout << "Enter output file name: ";
+                cin >> outFile_;
+                cout << "[ Write to: " << outFile_ << " ]\n" << endl;
+                return;
+            case 2:
+                ptMode_ = false;
                 cout << "[ Chose File mode ]\n" << endl;
                 cout << "Enter input file name: " << endl;
                 cout << ">> ";
                 cin.ignore();
-                getline(cin, _inFile);
+                getline(cin, inFile_);
+                cout << "[ Read from: " << inFile_ << " ]\n" << endl;
 
-
-                cout << "[ Read from: " << _inFile << " ]\n" << endl;
                 cout << "Enter output file name: " << endl;
                 cout << ">> ";
                 cin.ignore();
-                getline(cin, _outFile);
-                cout << "[ Write to: " << _outFile << " ]\n" << endl;
-                return;
-            case 2:
-                _keyboard = true;
-                cout << "[ Chose Plaintext mode ]\n" << endl;
-                cout << "Enter output file name: ";
-                cin >> _outFile;
-                cout << "[ Write to: " << _outFile << " ]\n" << endl;
+                getline(cin, outFile_);
+                cout << "[ Write to: " << outFile_ << " ]\n" << endl;
                 return;
             default:
                 cout << "Invalid input\n" << endl;
@@ -141,18 +140,18 @@ void User::askRoundKeyType() {
         switch (choice) {
             case 1:
                 cout << "[ Chose Predefined Round keys ]\n" << endl;
-                _keyFlag = keyFlag::PRE_DEFINED;
-                _roundNum = 8;
+                keyFlag_ = keyFlag::PRE_DEFINED;
+                roundNum_ = 8;
                 setRoundKeys(true);
                 return;
             case 2:
                 cout << "[ Chose User defined Round keys\n" << endl;
-                _keyFlag = keyFlag::USER_DEFINED;
+                keyFlag_ = keyFlag::USER_DEFINED;
                 setRoundKeys(false);
                 return;
             case 3:
                 cout << "[ Chose Default ]\n" << endl;
-                _keyFlag = keyFlag::DEFAULT;
+                keyFlag_ = keyFlag::DEFAULT;
                 return;
             default:
                 cout << "Invalid input\n" << endl;
@@ -176,8 +175,8 @@ void User::setRoundKeys(bool r) {
 
 void User::setPredefinedRoundKeys() {
     unsigned int tempKeys[] = PREDEFINED_ROUND_KEYS;
-    _roundKeys.clear();
-    _roundKeys.insert(_roundKeys.end(), begin(tempKeys), end(tempKeys));
+    roundKeys_.clear();
+    roundKeys_.insert(roundKeys_.end(), begin(tempKeys), end(tempKeys));
 }
 
 
@@ -201,8 +200,8 @@ void User::askRoundNum() {
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
         else {
-            cout << "[ Round Number : " << _roundNum << " ]\n" << endl;
-            _roundNum = rn;
+            cout << "[ Round Number : " << roundNum_ << " ]\n" << endl;
+            roundNum_ = rn;
             break;
         }
     }
@@ -212,7 +211,7 @@ void User::askRoundNum() {
 void User::askRoundKeys() {
     unsigned int rk;
 
-    for (int i = 0; i < _roundNum; i++) {
+    for (int i = 0; i < roundNum_; i++) {
         cout << "Round key [" << i << "] :";
         cin >> hex >> rk; // Read the key as hexadecimal
 
@@ -224,15 +223,15 @@ void User::askRoundKeys() {
             i--;
             continue;
         }
-        _roundKeys.push_back(rk); // Add the key to the vector
+        roundKeys_.push_back(rk); // Add the key to the vector
     }
     printRoundKeys();
 }
 
 
 void User::printRoundKeys() {
-    for (int i = 0; i < _roundKeys.size(); i++) {
-        cout << hex << "Round Key " << i << " : 0x" << _roundKeys[i] << endl;
+    for (int i = 0; i < roundKeys_.size(); i++) {
+        cout << hex << "Round Key " << i << " : 0x" << roundKeys_[i] << endl;
     }
 }
 
@@ -265,12 +264,12 @@ void User::askPasswordOption(int pl) {
         case 1:
             cout << "[ Chose personal Password ]\n" << endl;
             askPersonalPassword(pl);
-            cout << "[ Personal password: " << _password << " ]\n"<< endl;
+            cout << "[ Personal password: " << password_ << " ]\n"<< endl;
             break;
         case 2:
-            cout << "[ Chose random generated password ]" << endl;
+            cout << "[ Chose random generated password ]\n" << endl;
             generateRandomPassword(pl);
-            cout << "[ Generated password: " << _password << " ]\n"<< endl;
+            cout << "[ Generated password: " << password_ << " ]\n"<< endl;
             break;
         default:
             cout << "Invalid input\n" << endl;
@@ -284,8 +283,8 @@ void User::askPersonalPassword(int pl) {
         cout << ">> ";
 
         cin.ignore();
-        getline(cin, _password);
-        if (_password.length() != static_cast<size_t>(pl)) {
+        getline(cin, password_);
+        if (password_.length() != static_cast<size_t>(pl)) {
             cin.clear();
             cout << "Invalid password length. Please enter a password of length : " << pl << "\n"<< endl;
         }
@@ -298,14 +297,28 @@ void User::askPersonalPassword(int pl) {
 void User::generateRandomPassword(int length) {
     string characters = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
     for (int i = 0; i < length; ++i) {
-        _password += characters[rand() % characters.length()];
+        password_ += characters[rand() % characters.length()];
     }
 }
 
 
 void User::inputProcess() {
     srand(static_cast<unsigned int>(time(0)));
+    askEncryptType();
     askEncryptMode();
     askInOutFileType();
     askRoundKeyType();
 }
+
+
+int User::getType() const { return type_; }
+string User::getMode() const { return mode_; }
+string User::getInFile() const { return inFile_; }
+string User::getOutFile() const { return outFile_; }
+bool User::getPtMode() const { return ptMode_; }
+int User::getRoundNum() const { return roundNum_; }
+int User::getKeyFlag() const { return keyFlag_; }
+string User::getPassword() const { return password_; }
+vector<unsigned int> User::getRoundKeys() const { return roundKeys_; }
+
+

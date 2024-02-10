@@ -13,22 +13,28 @@ enum keyFlag {
     DEFAULT
 };
 
+enum EncryptionType {
+    DES_,
+    AES_
+};
+
 #define PREDEFINED_ROUND_KEYS {0xdddddddd, 0xeeeeeeee, 0xaaaaaaaa, 0xdddddddd, \
                                0xbbbbbbbb, 0xeeeeeeee, 0xeeeeeeee, 0xffffffff}
 
 using namespace std;
 
 class User {
-private:
-    string _type;
-    string _mode;
-    string _inFile;
-    string _outFile;
-    bool _keyboard;
-    int _keyFlag;
-    int _roundNum;
-    string _password;
-    vector<unsigned int> _roundKeys;
+
+protected:
+    int type_;
+    string mode_;
+    string inFile_;
+    string outFile_;
+    bool ptMode_;
+    int keyFlag_;
+    int roundNum_;
+    string password_;
+    vector<unsigned int> roundKeys_;
 
     void generateRandomPassword(int length);
     void askEncryptType();
@@ -45,6 +51,16 @@ private:
     void askPasswordOption(int pl);
 public:
     void inputProcess();
+    int getType() const;
+    string getMode() const;
+    string getInFile() const;
+    string getOutFile() const;
+    bool getPtMode() const;
+    int getRoundNum() const;
+    int getKeyFlag() const;
+    string getPassword() const;
+    vector<unsigned int> getRoundKeys() const;
+
 };
 
 #endif //COMP7402_ASSIGNMENT5_USER_H
