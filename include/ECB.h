@@ -17,7 +17,10 @@ private:
     string _pt;
 
 public:
-
+    void ECBProcess();
+    void getPlainText();
+    void processFile();
+    void processPlainText();
 };
 
 
