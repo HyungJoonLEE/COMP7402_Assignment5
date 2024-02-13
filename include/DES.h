@@ -23,8 +23,7 @@ private:
 //    string bpt_;
 
 public:
-    void handleDES_ECB(User &u);
-    void handleDES_CBC(User &u);
+    void handleDES(User &u);
     bool isValidHex(const string& str);
     string getPTInput(const string& prompt);
     static string hexCharToBin(char hexChar);

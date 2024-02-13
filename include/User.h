@@ -26,41 +26,40 @@ protected:
     int keyFlag_;
     int roundNum_;
     string pKey_;
+    int pKeyLen_;
     vector<unsigned int> roundKeys_;
 
-    void generateRandomKey(int length);
-    void askEncryptType();
     void askEncryptMode();
-    void askInOutFileType();
+    void askInOutFile();
+    void askRoundKeys();
+    void askKeyGenOption();
+    void askKeyLength();
+    void askKey(int pl);
+    void askRoundNum();
     void askRoundKeyType();
     void setRoundKeys(bool d);
-    void setPredefinedRoundKeys();
-    void askRoundNum();
-    void askRoundKeys();
+    void generateRandomKey(int length);
     void printRoundKeys();
-    int askPKeyLength();
-    void askPKey(int pl);
-    void askPKeyOption(int pl);
 public:
-    void inputProcess();
+    void processInput();
     int getType() const;
     string getMode() const;
     string getInFile() const;
     string getOutFile() const;
-    bool getPtMode() const;
+    bool isPlainTextMode() const;
     int getRoundNum() const;
     int getKeyFlag() const;
     string getPKey() const;
     vector<unsigned int> getRoundKeys() const;
 
     void setType(int t) { type_ = t; }
-    void setMode(string m) { mode_ = m; }
-    void setInFile(string s) { inFile_ = s; }
-    void setOutFile(string s) { inFile_ = s; }
+    void setMode(string m) { mode_ = std::move(m); }
+    void setInFile(string s) { inFile_ = std::move(s); }
+    void setOutFile(string s) { inFile_ = std::move(s); }
     void setPtMode(bool b) { ptMode_ = b; }
     void setKeyFlag(int k) { keyFlag_ = k; }
     void setRoundNum(int r) { roundNum_ = r; }
-    void setPKey(string k) { pKey_ = k; }
+    void setPKey(string k) { pKey_ = std::move(k); }
 };
 
 

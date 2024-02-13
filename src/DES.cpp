@@ -3,10 +3,10 @@
 string round_keys[16];
 string pt;
 
-void DES::handleDES_ECB(User &u) {
+void DES::handleDES(User &u) {
 //    pt.reserve(10000);
 //    bpt.reserve(40000);
-    if (u.getPtMode()) { // TODO: process plain text
+    if (u.isPlainTextMode()) { // TODO: process plain text
         pt = getPTInput("Type plain text to encrypt: \n>> ");
         pt = hexToBin(pt);
         generate_keys(hexToBin(u.getPKey()));
@@ -19,8 +19,8 @@ void DES::handleDES_ECB(User &u) {
 
 
 void DES::handleDES_CBC(User &u) {
-    if (u.getPtMode() == false) { } // TODO: process plain text
-    if (u.getPtMode() == false) { } // TODO: process plain text
+    if (!u.isPlainTextMode()) { } // TODO: process plain text
+    if (!u.isPlainTextMode()) { } // TODO: process plain text
 }
 
 

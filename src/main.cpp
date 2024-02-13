@@ -3,14 +3,14 @@
 
 int main() {
     User user;
-//    user.inputProcess();
-    user.setType(1);
-    user.setMode("ECB");
-    user.setOutFile("a.txt");
-    user.setPtMode(true);
-    user.setKeyFlag(1);
-    user.setRoundNum(8);
-    user.setPKey("03ksb~l!");
+    user.processInput();
+//    user.setType(1);
+//    user.setMode("ECB");
+//    user.setOutFile("a.txt");
+//    user.setPtMode(true);
+//    user.setKeyFlag(1);
+//    user.setRoundNum(8);
+//    user.setPKey("03ksb~l!");
 
     DES des;
     AES aes;
