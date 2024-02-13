@@ -3,7 +3,10 @@
 
 
 class AES {
-
+private:
+public:
+    AES handleAES_ECB();
+    AES handleAES_CBC();
 };
 
 

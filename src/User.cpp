@@ -56,7 +56,7 @@ void User::askEncryptMode() {
             case 1:
                 cout << "[ Chose ECB mode ]\n" << endl;
                 mode_ = "ECB";
-                askPasswordOption(askPasswordLength());
+                askPKeyOption(askPKeyLength());
                 return;
             case 2:
                 cout << "[ Chose CBC mode ]\n" << endl;
@@ -68,7 +68,6 @@ void User::askEncryptMode() {
         }
     }
 }
-
 
 void User::askInOutFileType() {
     int choice;
@@ -122,11 +121,11 @@ void User::askRoundKeyType() {
     int choice;
     while(true) {
         cout << "Setting Round keys" << endl;
-        cout << "1. Use predefined round keys"<< endl;
+        cout << "1. Default" << endl;
+        cout << "2. Enter own round keys" << endl;
+        cout << "3. Use predefined round keys"<< endl;
         cout << "   ( 0xdddddddd, 0xeeeeeeee, 0xaaaaaaaa, 0xdddddddd, "
                 "0xbbbbbbbb, 0xeeeeeeee, 0xeeeeeeee, 0xffffffff )" << endl;
-        cout << "2. Enter own round keys" << endl;
-        cout << "3. Default" << endl;
         cout << ">> ";
         cin >> choice;
 
@@ -139,10 +138,8 @@ void User::askRoundKeyType() {
 
         switch (choice) {
             case 1:
-                cout << "[ Chose Predefined Round keys ]\n" << endl;
-                keyFlag_ = keyFlag::PRE_DEFINED;
-                roundNum_ = 8;
-                setRoundKeys(true);
+                cout << "[ Chose Default ]\n" << endl;
+                keyFlag_ = keyFlag::DEFAULT;
                 return;
             case 2:
                 cout << "[ Chose User defined Round keys\n" << endl;
@@ -150,8 +147,10 @@ void User::askRoundKeyType() {
                 setRoundKeys(false);
                 return;
             case 3:
-                cout << "[ Chose Default ]\n" << endl;
-                keyFlag_ = keyFlag::DEFAULT;
+                cout << "[ Chose Predefined Round keys ]\n" << endl;
+                keyFlag_ = keyFlag::PRE_DEFINED;
+                roundNum_ = 8;
+                setRoundKeys(true);
                 return;
             default:
                 cout << "Invalid input\n" << endl;
@@ -170,7 +169,6 @@ void User::setRoundKeys(bool r) {
         askRoundKeys();
     }
 }
-
 
 
 void User::setPredefinedRoundKeys() {
@@ -236,15 +234,17 @@ void User::printRoundKeys() {
 }
 
 
-int User::askPasswordLength() {
+int User::askPKeyLength() {
     int passwordLength;
-    cout << "Choose the length of the password (must be a multiple of 8): " << endl;
+    cout << "Choose the length of the key for (key, iv, generateKey ...etc): " << endl;
+    cout << "(This must be a multiple of 8) " << endl;
     cout << ">> ";
     cin >> passwordLength;
 
     // Ensure the password length is a multiple of 8
     while (passwordLength % 8 != 0) {
-        cout << "Invalid length. Please enter a length that is a multiple of 8: ";
+        cout << "\n[Invalid length. Please enter a length that is a multiple of 8: " << endl;
+        cout << ">> ";
         cin >> passwordLength;
     }
     cout << "[ Chose password length = "<< passwordLength <<" ]\n" << endl;
@@ -252,24 +252,24 @@ int User::askPasswordLength() {
 }
 
 
-void User::askPasswordOption(int pl) {
+void User::askPKeyOption(int pl) {
     int choice;
     cout << "Type password option: " << endl;
-    cout << "1: Use personal password" << endl;
-    cout << "2: Random generated password" << endl;
+    cout << "1: Random generated password" << endl;
+    cout << "2: Use personal password" << endl;
     cout << ">> ";
     cin >> choice;
 
     switch (choice) {
         case 1:
-            cout << "[ Chose personal Password ]\n" << endl;
-            askPersonalPassword(pl);
-            cout << "[ Personal password: " << password_ << " ]\n"<< endl;
+            cout << "[ Chose random generated password ]\n" << endl;
+            generateRandomKey(pl);
+            cout << "[ Generated password: " << pKey_ << " ]\n"<< endl;
             break;
         case 2:
-            cout << "[ Chose random generated password ]\n" << endl;
-            generateRandomPassword(pl);
-            cout << "[ Generated password: " << password_ << " ]\n"<< endl;
+            cout << "[ Chose personal Password ]\n" << endl;
+            askPKey(pl);
+            cout << "[ Personal password: " << pKey_ << " ]\n"<< endl;
             break;
         default:
             cout << "Invalid input\n" << endl;
@@ -277,14 +277,14 @@ void User::askPasswordOption(int pl) {
 }
 
 
-void User::askPersonalPassword(int pl) {
+void User::askPKey(int pl) {
     while(true) {
         cout << "Type your password (length = " << pl << "): " << endl;
         cout << ">> ";
 
         cin.ignore();
-        getline(cin, password_);
-        if (password_.length() != static_cast<size_t>(pl)) {
+        getline(cin, pKey_);
+        if (pKey_.length() != static_cast<size_t>(pl)) {
             cin.clear();
             cout << "Invalid password length. Please enter a password of length : " << pl << "\n"<< endl;
         }
@@ -294,10 +294,10 @@ void User::askPersonalPassword(int pl) {
 }
 
 
-void User::generateRandomPassword(int length) {
-    string characters = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+void User::generateRandomKey(int length) {
+    string characters = "0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
     for (int i = 0; i < length; ++i) {
-        password_ += characters[rand() % characters.length()];
+        pKey_ += characters[rand() % characters.length()];
     }
 }
 
@@ -318,7 +318,7 @@ string User::getOutFile() const { return outFile_; }
 bool User::getPtMode() const { return ptMode_; }
 int User::getRoundNum() const { return roundNum_; }
 int User::getKeyFlag() const { return keyFlag_; }
-string User::getPassword() const { return password_; }
+string User::getPKey() const { return pKey_; }
 vector<unsigned int> User::getRoundKeys() const { return roundKeys_; }
 
 
