@@ -32,6 +32,8 @@ int main() {
 
     }
 
+    delete ecb;
+    delete cbc;
 
     return 0;
 }

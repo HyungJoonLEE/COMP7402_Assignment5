@@ -5,6 +5,7 @@ void User::setEnvironment() {
     if (encryptFlag_) {
         setEncryptMode();
         setMainKeyOption();
+        setHexMainKey();
         if (mode_ == CBC_) {
             setRoundNum();
             setRoundKeyOption();
@@ -107,7 +108,7 @@ void User::setMainKeyOption() {
             case 1:
                 generateRandomKey();
                 cout << "========== Random selected\n";
-                cout << "========== Generated main key: " << mainKey_ << " ]\n"<< endl;
+                cout << "========== Generated main key: " << mainKey_ << "\n"<< endl;
                 return;
             case 2:
                 cout << "========== User selected\n" << endl;
@@ -283,7 +284,7 @@ void User::setInOutFile() {
             case 1:
                 ptMode_ = true;
                 cout << "========== Plaintext mode selected\n" << endl;
-                cout << "Enter output file name: ";
+                cout << "Enter output file name:\n";
                 cout << ">> ";
                 cin.ignore();
                 getline(cin, outFile_);
@@ -312,17 +313,34 @@ void User::setInOutFile() {
 }
 
 
+void User::setHexMainKey() {
+    stringstream hexStream;
+    for (unsigned char c : mainKey_) {
+        hexStream.str("");
+        hexStream.clear();
+
+        // Convert character to hexadecimal
+        hexStream << hex << setw(2) << setfill('0') << static_cast<int>(c);
+
+        hexMainKey_.push_back(hexStream.str());
+    }
+}
+
+
 bool User::isEncryption() { return encryptFlag_; }
 
 
 //int User::getType() const { return type_; }
 int User::getMode() const { return mode_; }
-//string User::getInFile() const { return inFile_; }
+string User::getInFile() const { return inFile_; }
 string User::getOutFile() const { return outFile_; }
 bool User::isPlainTextMode() const { return ptMode_; }
+string User::getMainKey() const { return mainKey_; }
+
+vector<string> User::getHexMainKey() const { return hexMainKey_; }
+
 //int User::getRoundNum() const { return roundNum_; }
 //int User::getKeyFlag() const { return keyFlag_; }
-//string User::getPKey() const { return pKey_; }
 //vector<unsigned int> User::getRoundKeys() const { return roundKeys_; }
 
 

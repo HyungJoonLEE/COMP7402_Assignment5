@@ -7,7 +7,8 @@
 #include <vector>
 #include <string>
 #include <sstream>
-
+#include <iomanip>
+#include <sstream>
 
 #define PREDEFINED_ROUND_KEYS {0xdddddddd, 0xeeeeeeee, 0xaaaaaaaa, 0xdddddddd, \
                                0xbbbbbbbb, 0xeeeeeeee, 0xeeeeeeee, 0xffffffff}
@@ -38,6 +39,7 @@ protected:
     int keyFlag_;
     int roundNum_;
     string mainKey_;
+    vector<string> hexMainKey_;
     vector<unsigned int> roundKeys_;
 
     void generateRandomKey();
@@ -46,6 +48,7 @@ protected:
     void setEncryptMode();
     void setMainKeyOption();
     void setMainKey();
+    void setHexMainKey();
     void setRoundKeyOption();
     void setRoundNum();
     void setUserRoundKeys();
@@ -61,8 +64,9 @@ public:
     string getOutFile() const;
     bool isPlainTextMode() const;
     int getRoundNum() const;
+    vector<string> getHexMainKey() const;
     int getKeyFlag() const;
-    string getPKey() const;
+    string getMainKey() const;
     vector<unsigned int> getRoundKeys() const;
 
 //    void setMode(string m) { mode_ = m; }
