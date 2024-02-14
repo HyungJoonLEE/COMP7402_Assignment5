@@ -1,5 +1,5 @@
-#ifndef COMP7402_ASSIGNMENT5_DES_H
-#define COMP7402_ASSIGNMENT5_DES_H
+#ifndef COMP7402_ASSIGNMENT5_CBC_H
+#define COMP7402_ASSIGNMENT5_CBC_H
 
 #include <iostream>
 #include <string>
@@ -17,7 +17,7 @@ extern string pt;
 // Array to hold 16 keys
 extern string round_keys[16];
 
-class DES {
+class CBC {
 private:
 //    string pt_;
 //    string bpt_;
@@ -180,4 +180,4 @@ static int inverse_permutation[64]= {
 };
 
 
-#endif //COMP7402_ASSIGNMENT5_DES_H
+#endif //COMP7402_ASSIGNMENT5_CBC_H

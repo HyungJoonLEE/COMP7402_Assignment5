@@ -1,32 +1,37 @@
-#include "DES.h"
-#include "AES.h"
+#include "CBC.h"
+#include "ECB.h"
 
 int main() {
     User user;
-//    user.inputProcess();
-    user.setType(1);
-    user.setMode("ECB");
-    user.setOutFile("a.txt");
-    user.setPtMode(true);
-    user.setKeyFlag(1);
-    user.setRoundNum(8);
-    user.setPKey("03ksb~l!");
+    user.setEnvironment();
+//    user.setType(1);
+//    user.setMode("CBC");
+//    user.setOutFile("a.txt");
+//    user.setPtMode(true);
+//    user.setKeyFlag(1);
+//    user.setRoundNum(8);
+//    user.setPKey("03ksb~l!");
+    ECB *ecb = new ECB();
+    CBC *cbc = new CBC();
 
-    DES des;
-    AES aes;
-    switch (user.getType()) {
-        case DES_:
-            if (user.getMode() == "ECB") des.handleDES_ECB(user);
-            if (user.getMode() == "CBC") des.handleDES_CBC(user);
-            break;
-        case AES_:
-            if (user.getMode() == "ECB")
-            if (user.getMode() == "CBC")
-            break;
-        default:
-            cout << "Shouldn't get here" << endl;
-            break;
+
+    if (user.isEncryption()) {    // Encrypt mode
+        switch (user.getMode()) {
+            case encryptMode::ECB_:
+                ecb->processEncrypt(user);
+                break;
+            case encryptMode::CBC_:
+
+                break;
+            default:
+                cout << "Shouldn't get here" << endl;
+                break;
+        }
     }
+    else {  // Decrypt mode
+
+    }
+
 
     return 0;
 }
