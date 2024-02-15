@@ -1,18 +1,23 @@
 #include "User.h"
 
+
 void User::setEnvironment() {
     setEncryptDecrypt();
     if (encryptFlag_) {
         setEncryptMode();
-        setMainKeyOption();
-        setHexMainKey();
         if (mode_ == ECB_) {
+            setMainKeyOption();
             setRoundNum();
             setRoundKeyOption();
         }
+        if (mode_ == CBC_) {
+
+        }
         setInOutFile();
     }
+    else { // decrypt mode
 
+    }
 }
 
 
@@ -216,19 +221,22 @@ void User::setRoundKeyOption() {
 
 
 void User::setPredefinedRoundKeys() {
-    unsigned int tempKeys[] = PREDEFINED_ROUND_KEYS;
     roundKeys_.clear();
-    roundKeys_.insert(roundKeys_.end(), begin(tempKeys), end(tempKeys));
+    for (int i = 0; i < 8; i++) {
+        string cut0x = PREDEFINED_ROUND_KEYS[i].substr(2);
+        string binrk = keyHexToBinary(cut0x, true);
+        roundKeys_.push_back(binrk);
+    }
     printRoundKeys();
 }
 
 
 void User::setUserRoundKeys() {
-    unsigned int rk;
+    string rk;
 
     for (int i = 0; i < roundNum_; i++) {
         cout << "Round key [" << i << "] :";
-        cin >> hex >> rk; // Read the key as hexadecimal
+        cin >> rk; // Read the key as hexadecimal
 
         // Input validation
         if(cin.fail()) {
@@ -238,16 +246,29 @@ void User::setUserRoundKeys() {
             i--;
             continue;
         }
-        roundKeys_.push_back(rk); // Add the key to the vector
+        string binrk, hexrk;
+        bool padTo64 = rk.find("0x") == 0;
+        if (padTo64) {
+            hexrk = rk.substr(2); // Remove the "0x" prefix if present.
+            binrk = keyHexToBinary(hexrk, padTo64);
+        }
+        else {
+            hexrk = stringToHex(rk);
+            binrk = hexToBin(hexrk);
+        }
+        roundKeys_.push_back(binrk); // Add the key to the vector
     }
     printRoundKeys();
 }
 
 
 void User::printRoundKeys() {
+    cout << "< Round Keys >" << endl;
     for (int i = 0; i < roundKeys_.size(); i++) {
-        cout << hex << "Round Key " << i << " : 0x" << roundKeys_[i] << endl;
+        cout << hex << "Round Key " << i + 1 << " : " << roundKeys_[i]
+            << " = 0x" << binToHex(roundKeys_[i]) << endl;
     }
+    cout << endl;
 }
 
 
@@ -313,20 +334,6 @@ void User::setInOutFile() {
 }
 
 
-void User::setHexMainKey() {
-    stringstream hexStream;
-    for (unsigned char c : mainKey_) {
-        hexStream.str("");
-        hexStream.clear();
-
-        // Convert character to hexadecimal
-        hexStream << hex << setw(2) << setfill('0') << static_cast<int>(c);
-
-        hexMainKey_.push_back(hexStream.str());
-    }
-}
-
-
 bool User::isEncryption() { return encryptFlag_; }
 
 
@@ -337,10 +344,8 @@ string User::getOutFile() const { return outFile_; }
 bool User::isPlainTextMode() const { return ptMode_; }
 string User::getMainKey() const { return mainKey_; }
 
-vector<string> User::getHexMainKey() const { return hexMainKey_; }
-
-//int User::getRoundNum() const { return roundNum_; }
+int User::getRoundNum() const { return roundNum_; }
 int User::getKeyFlag() const { return keyFlag_; }
-//vector<unsigned int> User::getRoundKeys() const { return roundKeys_; }
+vector<string> User::getRoundKeys() { return roundKeys_; }
 
 

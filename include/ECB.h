@@ -1,11 +1,12 @@
 #ifndef COMP7402_ASSIGNMENT5_ECB_H
 #define COMP7402_ASSIGNMENT5_ECB_H
 
-
 #include <iostream>
 #include <fstream>
-#include <vector>
 #include <sstream>
+#include <limits>
+#include <utility>
+#include <vector>
 #include <string>
 #include <iomanip>
 #include <bitset>
@@ -20,6 +21,7 @@ private:
     vector<string> hexData_;
     vector<string> encData_;
     string encHexString_;
+    vector<string> roundKeys_;
 
 public:
     void processEncrypt(User& u);
@@ -27,12 +29,7 @@ public:
     void setInFileData(const string& inFile);
     void setOutFileData(const string& outFile);
     void addPadding();
-    void generate_keys(string key, vector<unsigned int>& roundKeyVector);
-    string hexToBinary(const string& hex);
-    void binaryToHex(const string& binary);
-    string stringToHex(const string& input);
-    string xorBinary(const string& a, const string& b);
-    string hexVectorToString(const std::vector<string>& vec);
+    void generate_keys(string key, int round);
     string feistel(unsigned int round);
     void encryptHexData(const vector<string>& vec);
 

@@ -1,17 +1,7 @@
 #ifndef COMP7402_ASSIGNMENT5_USER_H
 #define COMP7402_ASSIGNMENT5_USER_H
 
-#include <iostream>
-#include <limits>
-#include <utility>
-#include <vector>
-#include <string>
-#include <sstream>
-#include <iomanip>
-#include <sstream>
-
-#define PREDEFINED_ROUND_KEYS {0xdddddddd, 0xeeeeeeee, 0xaaaaaaaa, 0xdddddddd, \
-                               0xbbbbbbbb, 0xeeeeeeee, 0xeeeeeeee, 0xffffffff}
+#include "common.h"
 
 using namespace std;
 
@@ -39,8 +29,7 @@ protected:
     int keyFlag_;
     int roundNum_;
     string mainKey_;
-    vector<string> hexMainKey_;
-    vector<unsigned int> roundKeys_;
+    vector<string> roundKeys_;
 
     void generateRandomKey();
 
@@ -48,7 +37,6 @@ protected:
     void setEncryptMode();
     void setMainKeyOption();
     void setMainKey();
-    void setHexMainKey();
     void setRoundKeyOption();
     void setRoundNum();
     void setUserRoundKeys();
@@ -64,10 +52,9 @@ public:
     string getOutFile() const;
     bool isPlainTextMode() const;
     int getRoundNum() const;
-    vector<string> getHexMainKey() const;
     int getKeyFlag() const;
     string getMainKey() const;
-    vector<unsigned int> getRoundKeys() const;
+    vector<string> getRoundKeys();
 
 //    void setMode(string m) { mode_ = m; }
 //    void setInFile(string s) { inFile_ = s; }

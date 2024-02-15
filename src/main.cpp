@@ -1,4 +1,4 @@
-#include "CBC.h"
+//#include "CBC.h"
 #include "ECB.h"
 
 int main() {
@@ -12,7 +12,7 @@ int main() {
 //    user.setRoundNum(8);
 //    user.setPKey("03ksb~l!");
     ECB *ecb = new ECB();
-    CBC *cbc = new CBC();
+//    CBC *cbc = new CBC();
 
 
     if (user.isEncryption()) {    // Encrypt mode
@@ -33,7 +33,7 @@ int main() {
     }
 
     delete ecb;
-    delete cbc;
+//    delete cbc;
 
     return 0;
 }
