@@ -114,7 +114,8 @@ void User::setMainKeyOption() {
             case 1:
                 generateRandomKey();
                 cout << "========== Random selected\n";
-                cout << "========== Generated main key: " << mainKey_ << "\n"<< endl;
+                cout << "========== Generated main key: " << mainKey_
+                    << " = 0x" << binToHex(mainKey_) <<"\n"<< endl;
                 return;
             case 2:
                 cout << "========== User selected\n" << endl;

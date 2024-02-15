@@ -20,8 +20,9 @@ class ECB {
 private:
     string hexData_;
     string encData_;
-    string encHexString_;
+    string binData_;
     vector<string> roundKeys_;
+    vector<string> reverseRoundKeys_;
 
 public:
     void processEncrypt(User& u);
@@ -30,7 +31,7 @@ public:
     void setOutFileData(const string& outFile);
     void addPadding();
     void generate_keys(string key, int round);
-    string feistel(unsigned int round);
+    string Feistel(unsigned int round,  const string& bin);
     void encryptHexData(const vector<string>& vec);
 
     // Function to do a circular left shift by 1

@@ -116,3 +116,16 @@ int binToDec(string binary)
 string strToBin(const string& input) {
     return hexToBin(strToHex(input));
 }
+
+
+void appendToFile(const string& filename, const string& text) {
+    ofstream file(filename, ios::app);
+
+    if (!file.is_open()) {
+        cerr << "Failed to open or create the file: " << filename << endl;
+        return;
+    }
+
+    file << text << endl;
+    file.close();
+}

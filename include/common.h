@@ -29,5 +29,6 @@ string keyHexToBinary(const string& hex, bool padTo64);
 string decToBin(int decimal);
 int binToDec(string binary);
 string strToBin(const string& input);
+void appendToFile(const string& filename, const string& text);
 
 #endif //COMP7402_ASSIGNMENT5_COMMON_H
