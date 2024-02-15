@@ -23,14 +23,20 @@ string hexToBin(const string& hex) {
 
 
 string binToHex(const string& binary) {
-    string hexStr;
-    for (size_t i = 0; i < binary.length(); i += 8) {
-        bitset<8> eightBits(binary.substr(i, 8));
-        stringstream ss;
-        ss << hex << setw(2) << setfill('0') << eightBits.to_ulong();
-        hexStr += ss.str();
+//    string hexStr;
+//    for (size_t i = 0; i < binary.length(); i += 8) {
+//        bitset<8> eightBits(binary.substr(i, 8));
+//        stringstream ss;
+//        ss << hex << setw(2) << setfill('0') << eightBits.to_ulong();
+//        hexStr += ss.str();
+//    }
+//    return hexStr;
+    stringstream ss;
+    for (size_t i = 0; i < binary.length(); i += 4) {
+        bitset<4> bs(binary.substr(i, 4));
+        ss << hex << bs.to_ulong();
     }
-    return hexStr;
+    return ss.str();
 }
 
 
@@ -52,15 +58,6 @@ string strToHex(const string& input) {
     }
     // Return the hexadecimal string
     return hexStream.str();
-}
-
-
-string hexVectorToString(const vector<string> &vec) {
-    string result;
-    for (const auto& str : vec) {
-        result += str;
-    }
-    return result;
 }
 
 
@@ -118,14 +115,56 @@ string strToBin(const string& input) {
 }
 
 
-void appendToFile(const string& filename, const string& text) {
-    ofstream file(filename, ios::app);
-
-    if (!file.is_open()) {
-        cerr << "Failed to open or create the file: " << filename << endl;
+void appendToFile(const string& filename, const string& hex) {
+    ofstream file(filename, ios::out | ios::app);
+    if (!file) {
+        cerr << "Failed to open file for writing." << endl;
         return;
     }
+    file << hex;
 
-    file << text << endl;
     file.close();
+}
+
+
+string readHexDataFromFile(const string& filename) {
+    ifstream file(filename);
+    if (!file) {
+        cerr << "Failed to open file: " << filename << endl;
+        return "";
+    }
+
+    stringstream buffer;
+    string hexData;
+
+    // Read the file line by line
+    while (getline(file, hexData)) {
+        // Append each line of hex data to the stringstream
+        buffer << hexData;
+    }
+
+    // Convert the stringstream to a string and return it
+    return buffer.str();
+}
+
+
+bool isTxt(const string& filename) {
+    size_t dotPosition = filename.find_last_of('.');
+
+    if (dotPosition != string::npos) {
+        string extension = filename.substr(dotPosition + 1);
+        return extension == "txt";
+    }
+    return false;
+}
+
+
+string hexToASCII(const string& hexStr) {
+    string asciiStr;
+    for (size_t i = 0; i < hexStr.length(); i += 2) {
+        string part = hexStr.substr(i, 2); // Get two hexadecimal digits
+        char ch = static_cast<char>(stoi(part, nullptr, 16)); // Convert to char
+        asciiStr += ch;
+    }
+    return asciiStr;
 }

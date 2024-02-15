@@ -7,21 +7,44 @@ void ECB::processEncrypt(User& u) {
     binData_.reserve(10000);
 
     if (u.isPlainTextMode()) setPlainText("Enter plain text: ");
-    else setInFileData(u.getInFile());
-
-    addPadding();
+    else {
+        hexData_ = readHexDataFromFile(u.getInFile());
+    }
+    addPadding(isTxt(u.getInFile()));
+    cout << "hex data: "<< hexData_ << endl;
 
     if (u.getKeyFlag() == DEFAULT)
-        generate_keys(u.getMainKey(), u.getRoundNum());
+        generateRoundKeys(u.getMainKey(), u.getRoundNum());
     else
         roundKeys_ = u.getRoundKeys();
 
-    binData_ = hexToBin(hexData_);
+    binData_ = strToBin(hexData_);
     for (int i = 0; i < binData_.length(); i += 64) {
         string binData = binData_.substr(i, 64);
-        string cipherBin = Feistel(u.getRoundNum(), binData);
+        string cipherBin = Feistel(u.getRoundNum(), binData, roundKeys_);
+        cout << "encrypt: " << binToHex(cipherBin) << endl;
         appendToFile(u.getOutFile(), binToHex(cipherBin));
         binData.clear();
+        cipherBin.clear();
+    }
+}
+
+
+void ECB::processDecrypt(User &u) {
+    generateRoundKeys(u.getMainKey(), u.getRoundNum());
+    generateReverseRoundKeys(roundKeys_);
+
+    string data = readHexDataFromFile(u.getInFile());
+//    encData_ = readHexDataFromFile(u.getInFile());
+
+    string bin = hexToBin(data);
+    for (int i = 0; i < bin.length(); i += 64) {
+        string binData = bin.substr(i, 64);
+        string decryptBin = Feistel(u.getRoundNum(), binData, reverseRoundKeys_);
+        cout << decryptBin << endl;
+        appendToFile(u.getOutFile(), hexToASCII(binToHex(decryptBin)));
+        binData.clear();
+        decryptBin.clear();
     }
 }
 
@@ -79,17 +102,25 @@ void ECB::setOutFileData(const string &outFile) {
 }
 
 
-void ECB::addPadding() {
-    int padding = (16 - (int)hexData_.size() % 16) / 2 ;
-    if (padding != 16) {
+void ECB::addPadding(bool txt) {
+    if (txt) {
+        int padding = 8 - (int) hexData_.size() % 8;
         for (int i = 0; i < padding; ++i) {
-            hexData_ += "00";
+            hexData_ += '\0';
+        }
+    }
+    else {
+        int padding = (16 - (int)hexData_.size() % 16) / 2 ;
+        if (padding != 16) {
+            for (int i = 0; i < padding; ++i) {
+                hexData_ += "00";
+            }
         }
     }
 }
 
 
-void ECB::generate_keys(string key, int round) {
+void ECB::generateRoundKeys(string key, int round) {
     // 1. Compressing the key using the PC1 table
     string perm_key = "";
     for (int i = 0; i < 56; i++){
@@ -157,7 +188,7 @@ string ECB::shift_left_twice(string key_chunk) {
 }
 
 
-string ECB::Feistel(unsigned int round, const string& bin) {
+string ECB::Feistel(unsigned int round, const string& bin, const vector<string>& rk) {
     // 1. Applying the initial permutation
     string perm;
     string txt;
@@ -170,13 +201,13 @@ string ECB::Feistel(unsigned int round, const string& bin) {
 
     // The plain text is encrypted 16 times
     for (int i = 0; i < round; i++) {
-        string right_expanded = "";
+        string right_expanded;
         // 3.1. The right half of the plain text is expanded
         for (int j = 0; j < 48; j++) {
             right_expanded += right[expansion_table[j] - 1];
         };  // 3.3. The result is XOR with a key
-        string xored = XOR_binary(roundKeys_[i], right_expanded);
-        string res = "";
+        string xored = XOR_binary(rk[i], right_expanded);
+        string res;
         // 3.4. The result is divided into 8 equal parts and passed through 8 substitution boxes.
         // After passing through a substitution box, each box is reduces from 6 to 4 bits.
         for (int j = 0; j < 8; j++) {
@@ -191,8 +222,8 @@ string ECB::Feistel(unsigned int round, const string& bin) {
         }
         // 3.5. Another permutation is applied
         string perm2;
-        for (int i = 0; i < 32; i++) {
-            perm2 += res[permutation_tab[i] - 1];
+        for (int j : permutation_tab) {
+            perm2 += res[j - 1];
         }
         // 3.6. The result is xored with the left half
         xored = XOR_binary(perm2, left);
@@ -203,6 +234,7 @@ string ECB::Feistel(unsigned int round, const string& bin) {
             right = xored;
             left = temp;
         }
+
 //        cout << "Round " << i + 1 << ": "
 //             << "L" << i + 1 << ": " << binToHex(left) << "  "
 //             << "R" << i + 1 << ": " << binToHex(right) << "  "
@@ -211,19 +243,28 @@ string ECB::Feistel(unsigned int round, const string& bin) {
 //        txt += "Round " + to_string(i + 1) + ":  L" + to_string(i + 1) + ": "
 //               + binToHex(left) + "  R" + to_string(i + 1) + ": "
 //               + binToHex(right) + "  Round Key: " + binToHex(roundKeys_[i]);
+//        cout << "left: " << left << "   " << "right: " << right << endl;
 //        txt = "";
     }
     // 4. The halves of the plain text are applied
     string combined_text = left + right;
     string ciphertext;
     // The inverse of the initial permutation is applied
-    for (int i = 0; i < 64; i++) {
-        ciphertext += combined_text[inverse_permutation[i] - 1];
+    for (int i : inverse_permutation) {
+        ciphertext += combined_text[i - 1];
     }
 
-    cout << ciphertext << endl;
     return ciphertext;
 }
 
-// 17 Byte
-//
+
+// TODO: DECRYPTION FIELD
+void ECB::generateReverseRoundKeys(const vector<string> &rkv) {
+    int i = rkv.size() - 1;
+    while(i >= 0) {
+        reverseRoundKeys_.push_back(rkv[i]);
+        i--;
+    }
+}
+
+

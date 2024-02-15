@@ -26,13 +26,14 @@ private:
 
 public:
     void processEncrypt(User& u);
+    void processDecrypt(User& u);
     void setPlainText(const string& prompt);
     void setInFileData(const string& inFile);
     void setOutFileData(const string& outFile);
-    void addPadding();
-    void generate_keys(string key, int round);
-    string Feistel(unsigned int round,  const string& bin);
-    void encryptHexData(const vector<string>& vec);
+    void addPadding(bool txt);
+    void generateRoundKeys(string key, int round);
+    void generateReverseRoundKeys(const vector<string>& rkv);
+    string Feistel(unsigned int round,  const string& bin, const vector<string>& rk);
 
     // Function to do a circular left shift by 1
     string shift_left_once(string key_chunk);

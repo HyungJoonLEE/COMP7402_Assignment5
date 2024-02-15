@@ -2,20 +2,14 @@
 #include "ECB.h"
 
 int main() {
+    srand(static_cast<unsigned int>(time(NULL)));
     User user;
     user.setEnvironment();
-//    user.setType(1);
-//    user.setMode("CBC");
-//    user.setOutFile("a.txt");
-//    user.setPtMode(true);
-//    user.setKeyFlag(1);
-//    user.setRoundNum(8);
-//    user.setPKey("03ksb~l!");
+
     ECB *ecb = new ECB();
 //    CBC *cbc = new CBC();
 
-
-    if (user.isEncryption()) {    // Encrypt mode
+    if (user.isEncryption()) {
         switch (user.getMode()) {
             case encryptMode::ECB_:
                 ecb->processEncrypt(user);
@@ -27,10 +21,17 @@ int main() {
                 cout << "Shouldn't get here" << endl;
                 break;
         }
+    } else {  // Decrypt mode
+        switch (user.getMode()) {
+            case encryptMode::ECB_:
+                ecb->processDecrypt(user);
+                break;
+            default:
+                cout << "Shouldn't get here" << endl;
+                break;
+        }
     }
-    else {  // Decrypt mode
 
-    }
 
     delete ecb;
 //    delete cbc;

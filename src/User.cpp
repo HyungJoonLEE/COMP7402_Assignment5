@@ -4,7 +4,7 @@
 void User::setEnvironment() {
     setEncryptDecrypt();
     if (encryptFlag_) {
-        setEncryptMode();
+        setMode();
         if (mode_ == ECB_) {
             setMainKeyOption();
             setRoundNum();
@@ -13,11 +13,14 @@ void User::setEnvironment() {
         if (mode_ == CBC_) {
 
         }
-        setInOutFile();
-
+        setDataType();
     }
     else { // decrypt mode
-
+        setMode();
+        setMainKey();
+        setRoundNum();
+        setInFile();
+        setOutFile();
     }
 }
 
@@ -39,6 +42,7 @@ void User::setEncryptDecrypt() {
             cout << "Invalid input, please enter a number." << endl;
             continue;
         }
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
         switch (choice) {
             case 1:
@@ -57,7 +61,7 @@ void User::setEncryptDecrypt() {
 }
 
 
-void User::setEncryptMode() {
+void User::setMode() {
     int choice;
 
     while (true) {
@@ -74,6 +78,7 @@ void User::setEncryptMode() {
             cout << "Invalid input, please enter a number." << endl;
             continue;
         }
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
         switch (choice) {
             case 1:
@@ -109,6 +114,7 @@ void User::setMainKeyOption() {
             cout << "Invalid input\n" << endl;
             continue;
         }
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
         switch (choice) {
             case 1:
@@ -135,14 +141,13 @@ void User::setMainKey() {
                 "Type Main key (length must be 8):\n"
                 ">> ";
 
-        cin.ignore();
         getline(cin, mainKey_);
         if (mainKey_.length() != static_cast<size_t>(8)) {
-            cin.clear();
             cout << "Invalid Main key. Please enter a key of length : 8\n"<< endl;
+            cin.clear();
         }
         else {
-            cout << "========== Main key: " << mainKey_ << "\n" << endl;
+            cout << "========== Generated main key ASCII: " << mainKey_ << "\n" << endl;
             string binKey = strToBin(mainKey_);
             mainKey_ = binKey;
             break;
@@ -166,6 +171,7 @@ void User::setRoundNum() {
             cout << "Invalid input\n" << endl;
             continue;
         }
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
         if (rn <= 0 || rn > 16) {
             cout << "Invalid input\n" << endl;
@@ -173,7 +179,7 @@ void User::setRoundNum() {
         }
         else {
             roundNum_ = rn;
-            cout << "========== Round Number : " << roundNum_ << "selected\n" << endl;
+            cout << "========== Round Number : " << roundNum_ << "\n" << endl;
             break;
         }
     }
@@ -204,16 +210,19 @@ void User::setRoundKeyOption() {
             case 1:
                 keyFlag_ = keyFlag::DEFAULT;
                 cout << "========== Default selected\n" << endl;
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 return;
             case 2:
                 keyFlag_ = keyFlag::USER_DEFINED;
                 cout << "========== Own selected\n" << endl;
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 setUserRoundKeys();
                 return;
             case 3:
                 keyFlag_ = keyFlag::PRE_DEFINED;
                 roundNum_ = 8;
                 cout << "========== Predefined selected \n" << endl;
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 setPredefinedRoundKeys();
                 return;
             default:
@@ -280,16 +289,17 @@ void User::generateRandomKey() {
     for (int i = 0; i < 8; ++i) {
         mainKey_ += characters[rand() % characters.length()];
     }
+    cout << "========== Generated main key ASCII: " << mainKey_ << endl;
     string binKey = strToBin(mainKey_);
     mainKey_ = binKey;
 }
 
 
-void User::setInOutFile() {
+void User::setDataType() {
     int choice;
 
-    while(true) {
-        cout << "< Input / Output file setting >\n"
+    while (true) {
+        cout << "< Data type setting >\n"
                 "Choose input data type:\n"
                 "1. Plaintext\n"
                 "2. File\n"
@@ -298,10 +308,14 @@ void User::setInOutFile() {
 
         if (cin.fail()) {
             cin.clear();
+            // Correctly ignore characters until newline after failed input
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             cout << "Invalid input\n" << endl;
             continue;
         }
+
+        // Ignore newline left after reading choice
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
         switch (choice) {
             case 1:
@@ -309,37 +323,41 @@ void User::setInOutFile() {
                 cout << "========== Plaintext mode selected\n" << endl;
                 cout << "Enter output file name:\n";
                 cout << ">> ";
-                cin.ignore();
-                getline(cin, outFile_);
+                getline(cin, outFile_); // Correctly wait for user input
                 cout << "========== Write to: " << outFile_ << "\n" << endl;
                 return;
             case 2:
                 ptMode_ = false;
                 cout << "========== File mode selected\n" << endl;
-                cout << "Enter input file name: " << endl;
-                cout << ">> ";
-                cin.ignore();
-                getline(cin, inFile_);
-                cout << "==========  Read from: " << inFile_ << "\n" << endl;
-
-                cout << "Enter output file name: " << endl;
-                cout << ">> ";
-                cin.ignore();
-                getline(cin, outFile_);
-                cout << "========== Write to: " << outFile_ << "\n" << endl;
+                // Assuming setInFile and setOutFile are correctly implemented
+                setInFile();
+                setOutFile();
                 return;
             default:
                 cout << "Invalid input\n" << endl;
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                // No need for cin.ignore here; already done after cin >> choice
         }
     }
 }
 
+void User::setInFile() {
+    cout << "Enter input file name: " << endl;
+    cout << ">> ";
+    getline(cin, inFile_);
+    cout << "==========  Read from: " << inFile_ << "\n" << endl;
+
+}
+
+
+void User::setOutFile() {
+    cout << "Enter output file name: " << endl;
+    cout << ">> ";
+    getline(cin, outFile_);
+    cout << "========== Write to: " << outFile_ << "\n" << endl;
+}
+
 
 bool User::isEncryption() { return encryptFlag_; }
-
-
-//int User::getType() const { return type_; }
 int User::getMode() const { return mode_; }
 string User::getInFile() const { return inFile_; }
 string User::getOutFile() const { return outFile_; }
@@ -349,5 +367,6 @@ string User::getMainKey() const { return mainKey_; }
 int User::getRoundNum() const { return roundNum_; }
 int User::getKeyFlag() const { return keyFlag_; }
 vector<string> User::getRoundKeys() { return roundKeys_; }
+
 
 

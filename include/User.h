@@ -34,13 +34,16 @@ protected:
     void generateRandomKey();
 
     void setEncryptDecrypt();
-    void setEncryptMode();
+    void setMode();
     void setMainKeyOption();
     void setMainKey();
     void setRoundKeyOption();
     void setRoundNum();
     void setUserRoundKeys();
-    void setInOutFile();
+    void setDataType();
+    void setInFile();
+    void setOutFile();
+
     void setPredefinedRoundKeys();
     void printRoundKeys();
 public:
