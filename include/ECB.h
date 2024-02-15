@@ -18,8 +18,8 @@ using namespace std;
 
 class ECB {
 private:
-    vector<string> hexData_;
-    vector<string> encData_;
+    string hexData_;
+    string encData_;
     string encHexString_;
     vector<string> roundKeys_;
 

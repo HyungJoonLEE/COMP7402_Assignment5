@@ -1,5 +1,8 @@
 #include "Common.h"
 
+
+using namespace std;
+
 vector<string> PREDEFINED_ROUND_KEYS {"0xdddddddd", "0xeeeeeeee",
                                       "0xaaaaaaaa", "0xdddddddd",
                                       "0xbbbbbbbb", "0xeeeeeeee",
@@ -40,7 +43,7 @@ string XOR_binary(const string& a, const string& b) {
 }
 
 
-string stringToHex(const string& input) {
+string strToHex(const string& input) {
     stringstream hexStream;
     // Iterate over each character in the string
     for (unsigned char c : input) {
@@ -71,11 +74,45 @@ string keyHexToBinary(const string& hex, bool padTo64) {
             binaryString.push_back(((value >> j) & 1) ? '1' : '0');
         }
     }
-    cout << binaryString << endl;
+
     // Correct the padding logic
     if (padTo64 && binaryString.length() < 64) {
         string padded(64 - binaryString.length(), '0'); // Calculate correct number of zeros needed
         binaryString = padded + binaryString; // Prepend zeros to make the binary string 64 bits long
     }
     return binaryString;
+}
+
+
+string decToBin(int decimal) {
+    string binary;
+    while(decimal != 0) {
+        binary = (decimal % 2 == 0 ? "0" : "1") + binary;
+        decimal = decimal/2;
+    }
+    while(binary.length() < 4){
+        binary = "0" + binary;
+    }
+    return binary;
+}
+
+
+int binToDec(string binary)
+{
+    int decimal = 0;
+    int counter = 0;
+    int size = binary.length();
+    for(int i = size-1; i >= 0; i--)
+    {
+        if(binary[i] == '1'){
+            decimal += pow(2, counter);
+        }
+        counter++;
+    }
+    return decimal;
+}
+
+
+string strToBin(const string& input) {
+    return hexToBin(strToHex(input));
 }

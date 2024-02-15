@@ -14,6 +14,7 @@ void User::setEnvironment() {
 
         }
         setInOutFile();
+
     }
     else { // decrypt mode
 
@@ -141,6 +142,8 @@ void User::setMainKey() {
         }
         else {
             cout << "========== Main key: " << mainKey_ << "\n" << endl;
+            string binKey = strToBin(mainKey_);
+            mainKey_ = binKey;
             break;
         }
     }
@@ -168,8 +171,8 @@ void User::setRoundNum() {
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
         else {
-            cout << "========== Round Number : " << roundNum_ << "selected\n" << endl;
             roundNum_ = rn;
+            cout << "========== Round Number : " << roundNum_ << "selected\n" << endl;
             break;
         }
     }
@@ -253,8 +256,7 @@ void User::setUserRoundKeys() {
             binrk = keyHexToBinary(hexrk, padTo64);
         }
         else {
-            hexrk = stringToHex(rk);
-            binrk = hexToBin(hexrk);
+            binrk = strToBin(rk);
         }
         roundKeys_.push_back(binrk); // Add the key to the vector
     }
@@ -272,14 +274,13 @@ void User::printRoundKeys() {
 }
 
 
-
-
-
 void User::generateRandomKey() {
     string characters = "0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
     for (int i = 0; i < 8; ++i) {
         mainKey_ += characters[rand() % characters.length()];
     }
+    string binKey = strToBin(mainKey_);
+    mainKey_ = binKey;
 }
 
 

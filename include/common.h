@@ -12,6 +12,8 @@
 #include <bitset>
 #include <algorithm>
 #include <cctype>
+#include <cmath>
+
 
 using namespace std;
 
@@ -20,9 +22,12 @@ extern vector<string> PREDEFINED_ROUND_KEYS;
 string hexToBin(const string& hex);
 string binToHex(const string& binary);
 string XOR_binary(const string& a, const string& b);
-string stringToHex(const string& input);
+string strToHex(const string& input);
 string hexVectorToString(const vector<string> &vec);
 string extendHex(const string& hex, size_t desiredLength);
 string keyHexToBinary(const string& hex, bool padTo64);
+string decToBin(int decimal);
+int binToDec(string binary);
+string strToBin(const string& input);
 
 #endif //COMP7402_ASSIGNMENT5_COMMON_H
