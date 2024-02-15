@@ -6,7 +6,7 @@ void User::setEnvironment() {
         setEncryptMode();
         setMainKeyOption();
         setHexMainKey();
-        if (mode_ == CBC_) {
+        if (mode_ == ECB_) {
             setRoundNum();
             setRoundKeyOption();
         }
@@ -176,7 +176,7 @@ void User::setRoundKeyOption() {
     while(true) {
         cout << "< Setting Round key option >\n"
                 "Round key option\n"
-                "1. Default (program will generate for you)\n"
+                "1. Default (program will generate for you based on your main Key)\n"
                 "2. Enter own round keys\n"
                 "3. Use predefined round keys\n"
                 "   ( 0xdddddddd, 0xeeeeeeee, 0xaaaaaaaa, 0xdddddddd, \n"
@@ -340,7 +340,7 @@ string User::getMainKey() const { return mainKey_; }
 vector<string> User::getHexMainKey() const { return hexMainKey_; }
 
 //int User::getRoundNum() const { return roundNum_; }
-//int User::getKeyFlag() const { return keyFlag_; }
+int User::getKeyFlag() const { return keyFlag_; }
 //vector<unsigned int> User::getRoundKeys() const { return roundKeys_; }
 
 
