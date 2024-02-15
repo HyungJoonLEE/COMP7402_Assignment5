@@ -32,6 +32,6 @@ string readHexDataFromFile(const string& filename);
 bool isTxt(const std::string& filename);
 string hexToASCII(const string& hexStr);
 void processHexFile(const std::string& filePath);
-
+string removeTrailingZeros(string binStr, const std::string& sequence);
 
 #endif //COMP7402_ASSIGNMENT5_COMMON_H

@@ -168,3 +168,13 @@ string hexToASCII(const string& hexStr) {
     }
     return asciiStr;
 }
+
+
+string removeTrailingZeros(string binStr, const std::string& sequence) {
+    size_t position = binStr.find(sequence);
+    if (position != string::npos) {
+        // Erase the sequence and everything that follows
+        return binStr.substr(0, position);
+    }
+    return binStr; // Re
+}

@@ -31,17 +31,23 @@ void ECB::processEncrypt(User& u) {
 
 
 void ECB::processDecrypt(User &u) {
+    hexData_.reserve(10000);
+    encData_.reserve(10000);
+    binData_.reserve(10000);
+
     generateRoundKeys(u.getMainKey(), u.getRoundNum());
     generateReverseRoundKeys(roundKeys_);
-
-    string data = readHexDataFromFile(u.getInFile());
+    hexData_ = readHexDataFromFile(u.getInFile());
 //    encData_ = readHexDataFromFile(u.getInFile());
 
-    string bin = hexToBin(data);
-    for (int i = 0; i < bin.length(); i += 64) {
-        string binData = bin.substr(i, 64);
+    string binData_ = hexToBin(hexData_);
+    for (int i = 0; i < binData_.length(); i += 64) {
+        string binData = binData_.substr(i, 64);
         string decryptBin = Feistel(u.getRoundNum(), binData, reverseRoundKeys_);
         cout << decryptBin << endl;
+        if (i >= binData_.length() - 64) {
+            decryptBin =  removeTrailingZeros(decryptBin, "00000000");
+        }
         appendToFile(u.getOutFile(), hexToASCII(binToHex(decryptBin)));
         binData.clear();
         decryptBin.clear();
