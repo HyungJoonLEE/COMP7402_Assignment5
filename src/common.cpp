@@ -43,20 +43,20 @@ string hexToBin(const string& hexStr) {
 
 
 string binToHex(const string& binary) {
-    string hexStr;
-    for (size_t i = 0; i < binary.length(); i += 8) {
-        bitset<8> eightBits(binary.substr(i, 8));
-        stringstream ss;
-        ss << hex << setw(2) << setfill('0') << eightBits.to_ulong();
-        hexStr += ss.str();
-    }
-    return hexStr;
-//    stringstream ss;
-//    for (size_t i = 0; i < binary.length(); i += 4) {
-//        bitset<4> bs(binary.substr(i, 4));
-//        ss << hex << bs.to_ulong();
+//    string hexStr;
+//    for (size_t i = 0; i < binary.length(); i += 8) {
+//        bitset<8> eightBits(binary.substr(i, 8));
+//        stringstream ss;
+//        ss << hex << setw(2) << setfill('0') << eightBits.to_ulong();
+//        hexStr += ss.str();
 //    }
-//    return ss.str();
+//    return hexStr;
+    stringstream ss;
+    for (size_t i = 0; i < binary.length(); i += 4) {
+        bitset<4> bs(binary.substr(i, 4));
+        ss << hex << bs.to_ulong();
+    }
+    return ss.str();
 }
 
 
@@ -136,14 +136,31 @@ string strToBin(const string& input) {
 
 
 void appendToFile(const string& filename, const string& hex) {
-    ofstream file(filename, ios::out | ios::app);
-    if (!file) {
-        cerr << "Failed to open file for writing." << endl;
-        return;
-    }
-    file << hex;
+    if (isTxt(filename)) {
+        ofstream file(filename, ios::out | ios::app);
+        if (!file) {
+            cerr << "Failed to open file for writing." << endl;
+            return;
+        }
+        file << hex;
 
-    file.close();
+        file.close();
+    }
+    else {
+        ofstream file(filename, ios::app | ios::binary);
+        if (!file) {
+            cerr << "Failed to open file for writing." << endl;
+            return;
+        }
+
+        for (size_t i = 0; i < hex.length(); i += 2) {
+            // Convert each pair of hex digits to a byte
+            int value = hexCharToValue(hex[i]) * 16 + hexCharToValue(hex[i + 1]);
+            char byte = static_cast<char>(value);
+            file.write(&byte, 1);
+        }
+        file.close();
+    }
 }
 
 
@@ -156,7 +173,7 @@ string readPlainText(const string& prompt) {
 }
 
 
-string readFile(const string& filename, bool enc) {
+string readFile(const string& filename) {
     if (isTxt(filename)) {
         ifstream file(filename);
         string line;
@@ -184,11 +201,12 @@ string readFile(const string& filename, bool enc) {
         }
 
         stringstream hexStream;
-        char byte;
-        // Read each byte from the file
-        while (file.read(&byte, 1)) {
-            // Convert each byte to hexadecimal and append to the stringstream
-            hexStream << hex << setw(2) << setfill('0') << (0xFF & static_cast<int>(byte));
+        char byte[2];
+        while (file.read(byte, 2)) {
+//            swap(byte[0], byte[1]);
+            for (char i : byte) {
+                hexStream << hex << setw(2) << setfill('0') << (0xFF & static_cast<int>(i));
+            }
         }
 
         file.close();
@@ -236,43 +254,11 @@ string removeTrailingZeros(string binStr) {
 }
 
 
-void addPadding(bool txt, string& hex) {
+void addPadding(string& hex) {
     int padding = 16 - (int) hex.size() % 16;
     for (int i = 0; i < padding; ++i) {
         hex += "0";
     }
-}
-
-
-// Function to convert a single hex character to its decimal value
-unsigned char hexCharToValue(char hexChar) {
-    if (hexChar >= '0' && hexChar <= '9')
-        return hexChar - '0';
-    if (hexChar >= 'a' && hexChar <= 'f')
-        return 10 + hexChar - 'a';
-    if (hexChar >= 'A' && hexChar <= 'F')
-        return 10 + hexChar - 'A';
-    throw invalid_argument("Invalid hex character");
-}
-
-
-vector<unsigned char> hexStringToBinary(const string& hexString) {
-    vector<unsigned char> binaryData;
-    for (size_t i = 0; i < hexString.length(); i += 2) {
-        unsigned char value = hexCharToValue(hexString[i]) * 16 + hexCharToValue(hexString[i + 1]);
-        binaryData.push_back(value);
-    }
-    return binaryData;
-}
-
-
-string binaryDataToHexString(const vector<unsigned char>& binaryData) {
-    ostringstream oss;
-    oss << hex << setfill('0');
-    for (unsigned char byte : binaryData) {
-        oss << setw(2) << static_cast<int>(byte) << " ";
-    }
-    return oss.str();
 }
 
 
@@ -281,4 +267,82 @@ void printRoundKeys(vector<string> rks) {
     for (int i = 0; i < rks.size(); i++) {
         cout << hex << "Round Key " << i + 1 << " : " << rks[i]  << endl;
     }
+}
+
+
+void runDD(const string& originFileName, const string& encryptedFileName) {
+    string command = "dd if=" + originFileName + " of=" + encryptedFileName + " bs=1 count=54 conv=notrunc";
+    int status = system(command.c_str());
+    if (status != 0) {
+        cerr << "Command failed with status: " << status << endl;
+    }
+}
+
+
+void readBMPHeader(ifstream& file, BMPHeader& bmpHeader, DIBHeader& dibHeader) {
+    file.read(reinterpret_cast<char*>(&bmpHeader.file_type), sizeof(bmpHeader.file_type));
+    file.read(reinterpret_cast<char*>(&bmpHeader.file_size), sizeof(bmpHeader.file_size));
+    file.read(reinterpret_cast<char*>(&bmpHeader.reserved1), sizeof(bmpHeader.reserved1));
+    file.read(reinterpret_cast<char*>(&bmpHeader.reserved2), sizeof(bmpHeader.reserved2));
+    file.read(reinterpret_cast<char*>(&bmpHeader.offset_data), sizeof(bmpHeader.offset_data));
+
+    file.read(reinterpret_cast<char*>(&dibHeader), sizeof(dibHeader));
+}
+
+int calculatePadding(int width, int bitsPerPixel) {
+    int lineBytes = (width * bitsPerPixel + 7) / 8;
+    int padding = (4 - (lineBytes % 4)) % 4;
+    return padding;
+}
+
+
+void changeBMPRowPadding(const string& inputFileName, const string& outputFileName) {
+    ifstream inputFile(inputFileName, ios::binary);
+    ofstream outputFile(outputFileName, ios::binary);
+
+    if (!inputFile.is_open() || !outputFile.is_open()) {
+        cerr << "Could not open file(s)." << endl;
+        return;
+    }
+
+    BMPHeader bmpHeader;
+    DIBHeader dibHeader;
+    readBMPHeader(inputFile, bmpHeader, dibHeader);
+
+    // Write the read headers to the output file
+    outputFile.write(reinterpret_cast<const char*>(&bmpHeader), sizeof(bmpHeader));
+    outputFile.write(reinterpret_cast<const char*>(&dibHeader), sizeof(dibHeader));
+
+    // Calculate padding
+    int padding = calculatePadding(dibHeader.width, dibHeader.bit_count);
+    int newPadding = (4 - ((dibHeader.width * dibHeader.bit_count / 8) % 4)) % 4;
+    vector<char> paddingBytes(newPadding, 0x00); // New padding bytes
+
+    // Skip to the pixel data
+    inputFile.seekg(bmpHeader.offset_data, ios::beg);
+    outputFile.seekp(bmpHeader.offset_data, ios::beg);
+
+    // For each row, read it, skip the original padding, write it, and add new padding
+    int rowSize = (dibHeader.width * dibHeader.bit_count + 7) / 8;
+    vector<char> row(rowSize);
+
+    for (int y = 0; y < dibHeader.height; ++y) {
+        inputFile.read(row.data(), row.size());
+        outputFile.write(row.data(), row.size());
+        if (newPadding > 0) {
+            outputFile.write(paddingBytes.data(), paddingBytes.size());
+        }
+        inputFile.seekg(padding, ios::cur); // Skip original padding
+    }
+
+    inputFile.close();
+    outputFile.close();
+}
+
+
+int hexCharToValue(char hexChar) {
+    if (hexChar >= '0' && hexChar <= '9') return hexChar - '0';
+    if (hexChar >= 'a' && hexChar <= 'f') return 10 + (hexChar - 'a');
+    if (hexChar >= 'A' && hexChar <= 'F') return 10 + (hexChar - 'A');
+    return 0;
 }

@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cmath>
+#include <cstdint>
 
 
 using namespace std;
@@ -29,19 +30,35 @@ string decToBin(int decimal);
 int binToDec(string binary);
 string strToBin(const string& input);
 void appendToFile(const string& filename, const string& hex);
-string readFile(const string& filename, bool enc);
+string readFile(const string& filename);
 string readPlainText(const string& prompt);
 bool isTxt(const string& filename);
 string hexToASCII(const string& hexStr);
-void processHexFile(const string& filePath);
 string removeTrailingZeros(string binStr);
-void addPadding(bool txt, string& hex);
+void addPadding(string& hex);
+void runDD(const string& originFileName, const string& encryptedFileName);
 void printRoundKeys(vector<string> rks);
+int hexCharToValue(char hexChar);
 
+struct BMPHeader {
+    uint16_t file_type{0x4D42};          // File type always BM which is 0x4D42
+    uint32_t file_size{0};               // Size of the file (in bytes)
+    uint16_t reserved1{0};               // Reserved, always 0
+    uint16_t reserved2{0};               // Reserved, always 0
+    uint32_t offset_data{0};             // Start position of pixel data (bytes from the beginning of the file)
+};
 
+struct DIBHeader {
+    uint32_t size{0};                    // Size of this header (in bytes)
+    int32_t width{0};                    // width of bitmap in pixels
+    int32_t height{0};                   // width of bitmap in pixels
+    uint16_t planes{1};                  // No. of planes for the target device, this is always 1
+    uint16_t bit_count{0};               // No. of bits per pixel
+    //... other fields not used here
+};
 
-unsigned char hexCharToValue(char hexChar);
-vector<unsigned char> hexStringToBinary(const string& hexString);
-string binaryDataToHexString(const vector<unsigned char>& binaryData);
+void readBMPHeader(ifstream& file, BMPHeader& bmpHeader, DIBHeader& dibHeader);
+int calculatePadding(int width, int bitsPerPixel);
+void changeBMPRowPadding(const string& inputFileName, const string& outputFileName);
 
 #endif //COMP7402_ASSIGNMENT5_COMMON_H
