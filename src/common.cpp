@@ -230,19 +230,9 @@ string removeTrailingZeros(string binStr, const string& sequence) {
 
 
 void addPadding(bool txt, string& hex) {
-    if (txt) {
-        int padding = 8 - (int) hex.size() % 8;
-        for (int i = 0; i < padding; ++i) {
-            hex += '\0';
-        }
-    }
-    else {
-        int padding = (16 - (int)hex.size() % 16) / 2 ;
-        if (padding != 16) {
-            for (int i = 0; i < padding; ++i) {
-                hex += "00";
-            }
-        }
+    int padding = 16 - (int) hex.size() % 16;
+    for (int i = 0; i < padding; ++i) {
+        hex += "0";
     }
 }
 

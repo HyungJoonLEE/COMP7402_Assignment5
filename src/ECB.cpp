@@ -9,12 +9,10 @@ void ECB::processEncrypt(User& u) {
     if (u.isPlainTextMode()) {
         data = readPlainText("Enter plain text: ");
         hexdata = strToHex(data);
-        addPadding(false, hexdata);
     }
     else {
         data = readFile(u.getInFile(), true);
         hexdata = strToHex(data);
-        addPadding(isTxt(u.getInFile()), hexdata);
     }
 
     if (u.getKeyFlag() == PRE_DEFINED)
@@ -22,7 +20,15 @@ void ECB::processEncrypt(User& u) {
     else
         generateRoundKeys(u.getMainKey(), u.getRoundNum(), false);
 
+//    cout << "padding before : " << hexdata.length() << endl;
+//    cout << "padding before : " << hexdata << endl;
+    addPadding(isTxt(u.getInFile()), hexdata);
+//    cout << "padding after : " << hexdata.length() << endl;
+//    cout << "padding after : " << hexdata << endl;
     bindata = hexToBin(hexdata);
+
+
+
     cout << "Before encrypt: " << bindata << endl;
 
     for (int i = 0; i < bindata.length(); i += 64) {
@@ -30,6 +36,8 @@ void ECB::processEncrypt(User& u) {
         string cipherBin = Feistel(u.getRoundNum(), bin, roundKeys_);
         cout << "After encrypt: " << cipherBin << endl;
         appendToFile(u.getOutFile(), binToHex(cipherBin));
+        bin.clear();
+        cipherBin.clear();
     }
 }
 
@@ -174,31 +182,32 @@ string ECB::shift_left_twice(string key_chunk) {
 
 
 string ECB::Feistel(unsigned int round, const string& bin, const vector<string>& rk) {
-    //1. Applying the initial permutation
+    // Initial permutation
     string perm;
     string txt;
     for (int i : initial_permutation){
         perm += bin[i - 1];
     }
-    // 2. Dividing the result into two equal halves
-    string left = perm.substr(0, 32);
-    string right = perm.substr(32, 32);
+
+    // Dividing the result into two equal halves
+    string binL = perm.substr(0, 32);
+    string binR = perm.substr(32, 32);
 
     // The plain text is encrypted # of round times
     for (int i = 0; i < round; i++) {
-        string right_expanded;
+        string right_expand;
         // 3.1. The right half of the plain text is expanded
         for (int j : expansion_table) {
-            right_expanded += right[j - 1];
+            right_expand += binR[j - 1];
         }
         // 3.3. The result is xored with a key
-        string xored = XOR_binary(rk[i], right_expanded);
+        string xored = XOR_binary(rk[i], right_expand);
         string res;
         // 3.4. The result is divided into 8 equal parts and passed
         // through 8 substitution boxes. After passing through a
         // substitution box, each box is reduces from 6 to 4 bits.
         for (int j = 0; j < 8; j++) {
-            // Finding row and column indices to lookup the substitution box
+            // Finding row and column indices to look up the substitution box
             string row1= xored.substr(j * 6,1) + xored.substr(j * 6 + 5,1);
             int row = binToDec(row1);
             string col1 = xored.substr(j * 6 + 1,1) + xored.substr(j * 6 + 2,1)
@@ -207,32 +216,36 @@ string ECB::Feistel(unsigned int round, const string& bin, const vector<string>&
             int val = substition_boxes[j][row][col];
             res += decToBin(val);
         }
-        // 3.5. Another permutation is applied
+        // Another permutation2 is applied
         string perm2;
         for (int j : permutation_tab) {
             perm2 += res[j - 1];
         }
-        // 3.6. The result is xored with the left half
-        xored = XOR_binary(perm2, left);
-        // 3.7. The left and the right parts of the plain text are swapped
-        left = xored;
+        // XOR with the left half
+        xored = XOR_binary(perm2, binL);
+
+        // The left and the right swapped
+        binL = xored;
         if (i < round - 1) {
-            string temp = right;
-            right = xored;
-            left = temp;
+            string temp = binR;
+            binR = xored;
+            binL = temp;
         }
 //        cout << "Round " << i + 1 << ": "
-//             << "L" << i + 1 << ": " << binToHex(left) << "  "
-//             << "R" << i + 1 << ": " << binToHex(right) << "  "
+//             << "L" << i + 1 << ": " << binToHex(binL) << "  "
+//             << "R" << i + 1 << ": " << binToHex(binR) << "  "
 //             << "Round Key: " << binToHex(rk[i]) << endl;
     }
-    // 4. The halves of the plain text are applied
-    string combined_text = left + right;
+
+    // The halves of the plain text are applied
+    string combined = binL + binR;
     string ciphertext;
-    // The inverse of the initial permuttaion is applied
+
+    // Inverse of the initial permutation is applied
     for (int i : inverse_permutation){
-        ciphertext += combined_text[i - 1];
+        ciphertext += combined[i - 1];
     }
+
     //And we finally get the cipher text
     return ciphertext;
 }
