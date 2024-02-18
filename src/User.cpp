@@ -3,12 +3,13 @@
 
 void User::setEnvironment() {
     setEncryptDecrypt();
+    setMode();
     if (encryptFlag_) {
-        setMode();
         if (mode_ == ECB_) {
-            setMainKeyOption();
             setRoundNum();
             setRoundKeyOption();
+            if (keyFlag_ != PRE_DEFINED)
+                setMainKeyOption();
         }
         if (mode_ == CBC_) {
 
@@ -16,9 +17,16 @@ void User::setEnvironment() {
         setDataType();
     }
     else { // decrypt mode
-        setMode();
-        setMainKey();
         setRoundNum();
+        if (roundNum_ == 8) {
+            if (!wasPredefinedRoundKeys())
+                setMainKey();
+            else
+                setPredefinedRoundKeys();
+        }
+        else {
+            setMainKey();
+        }
         setInFile();
         setOutFile();
     }
@@ -26,7 +34,7 @@ void User::setEnvironment() {
 
 
 void User::setEncryptDecrypt() {
-    int choice;
+    string n;
 
     while (true) {
         cout << "< Encrypt | Decrypt >\n"
@@ -34,35 +42,26 @@ void User::setEncryptDecrypt() {
                 "1. Encryption\n"
                 "2. Decryption\n"
                 ">> ";
-        cin >> choice;
-
-        if (cin.fail()) {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input, please enter a number." << endl;
-            continue;
+        getline(cin, n);
+        if (n == "1") {
+            encryptFlag_ = true;
+            cout << "========== Encryption selected\n" << endl;
+            break;
         }
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-        switch (choice) {
-            case 1:
-                encryptFlag_ = true;
-                cout << "========== Encryption selected\n" << endl;
-                return;
-            case 2:
-                encryptFlag_ = false;
-                cout << "========== Decryption selected\n" << endl;
-                return;
-            default:
-                cout << "Invalid input\n" << endl;
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        if (n == "2") {
+            encryptFlag_ = false;
+            cout << "========== Decryption selected\n" << endl;
+            break;
+        }
+        else {
+            cout << "Invalid input\n" << endl;
         }
     }
 }
 
 
 void User::setMode() {
-    int choice;
+    string n;
 
     while (true) {
         cout << "< Encryption mode >\n"
@@ -70,35 +69,27 @@ void User::setMode() {
                 "1. ECB (Electronic Code Block)\n"
                 "2. CBC (Cipher Block Chaining)\n"
                 ">> ";
-        cin >> choice;
+        getline(cin, n);
 
-        if (cin.fail()) {
-            cin.clear(); // Clear error flags
-            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Discard bad input
-            cout << "Invalid input, please enter a number." << endl;
-            continue;
+        if (n == "1") {
+            mode_ = ECB_;
+            cout << "========== ECB mode selected\n" << endl;
+            break;
         }
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-        switch (choice) {
-            case 1:
-                mode_ = ECB_;
-                cout << "========== ECB mode selected\n" << endl;
-                return;
-            case 2:
-                mode_ = CBC_;
-                cout << "========== CBC mode selected\n" << endl;
-                return;
-            default:
-                cout << "Invalid input\n" << endl;
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        if (n == "2") {
+            mode_ = CBC_;
+            cout << "========== CBC mode selected\n" << endl;
+            break;
+        }
+        else {
+            cout << "Invalid input\n" << endl;
         }
     }
 }
 
 
 void User::setMainKeyOption() {
-    int choice;
+    string n;
 
     while (true) {
         cout << "< Main key generator >\n"
@@ -106,30 +97,22 @@ void User::setMainKeyOption() {
                 "1: Random Main key\n"
                 "2: User Main key\n"
                 ">> ";
-        cin >> choice;
+        getline(cin, n);
 
-        if (cin.fail()) {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input\n" << endl;
-            continue;
+        if (n == "1") {
+            generateRandomKey();
+            cout << "========== Random selected\n";
+            cout << "========== Generated main key: " << mainKey_
+                 << " = 0x" << binToHex(mainKey_) <<"\n"<< endl;
+            break;
         }
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-        switch (choice) {
-            case 1:
-                generateRandomKey();
-                cout << "========== Random selected\n";
-                cout << "========== Generated main key: " << mainKey_
-                    << " = 0x" << binToHex(mainKey_) <<"\n"<< endl;
-                return;
-            case 2:
-                cout << "========== User selected\n" << endl;
-                setMainKey();
-                return;
-            default:
-                cout << "Invalid input\n" << endl;
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        if (n == "2") {
+            cout << "========== User selected\n" << endl;
+            setMainKey();
+            break;
+        }
+        else {
+            cout << "Invalid input\n" << endl;
         }
     }
 }
@@ -157,25 +140,17 @@ void User::setMainKey() {
 
 
 void User::setRoundNum() {
+    string n;
     int rn;
 
     while(true) {
         cout << "< Number of rounds >\n"
                 "Set number of Round(s)\n"
                 ">> ";
-        cin >> rn;
-
-        if (cin.fail()) {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input\n" << endl;
-            continue;
-        }
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
+        getline(cin, n);
+        rn = stoi(n);
         if (rn <= 0 || rn > 16) {
             cout << "Invalid input\n" << endl;
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
         else {
             roundNum_ = rn;
@@ -187,47 +162,39 @@ void User::setRoundNum() {
 
 
 void User::setRoundKeyOption() {
-    int choice;
+    string n;
     while(true) {
         cout << "< Setting Round key option >\n"
                 "Round key option\n"
                 "1. Default (program will generate for you based on your main Key)\n"
-                "2. Enter own round keys\n"
-                "3. Use predefined round keys\n"
-                "   ( 0xdddddddd, 0xeeeeeeee, 0xaaaaaaaa, 0xdddddddd, \n"
-                "       0xbbbbbbbb, 0xeeeeeeee, 0xeeeeeeee, 0xffffffff )\n";
-        cout << ">> ";
-        cin >> choice;
-
-        if (cin.fail()) {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input\n" << endl;
-            continue;
+                "2. Enter own round keys" << endl;
+        if (roundNum_ == 8) {
+            cout << "3. Use predefined round keys\n"
+                    "   ( 0xdddddddd, 0xeeeeeeee, 0xaaaaaaaa, 0xdddddddd, \n"
+                    "       0xbbbbbbbb, 0xeeeeeeee, 0xeeeeeeee, 0xffffffff )" << endl;
         }
+        cout << ">> ";
+        getline(cin, n);
 
-        switch (choice) {
-            case 1:
-                keyFlag_ = keyFlag::DEFAULT;
-                cout << "========== Default selected\n" << endl;
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                return;
-            case 2:
-                keyFlag_ = keyFlag::USER_DEFINED;
-                cout << "========== Own selected\n" << endl;
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                setUserRoundKeys();
-                return;
-            case 3:
-                keyFlag_ = keyFlag::PRE_DEFINED;
-                roundNum_ = 8;
-                cout << "========== Predefined selected \n" << endl;
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                setPredefinedRoundKeys();
-                return;
-            default:
-                cout << "Invalid input\n" << endl;
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        if (n == "1") {
+            keyFlag_ = keyFlag::DEFAULT;
+            cout << "========== Default selected\n" << endl;
+            break;
+        }
+        if (n == "2") {
+            keyFlag_ = keyFlag::USER_DEFINED;
+            cout << "========== Own selected\n" << endl;
+            setUserRoundKeys();
+            break;
+        }
+        if (roundNum_ == 8 && n == "3") {
+            keyFlag_ = keyFlag::PRE_DEFINED;
+            cout << "========== Predefined selected \n" << endl;
+            setPredefinedRoundKeys();
+            break;
+        }
+        else {
+            cout << "Invalid input\n" << endl;
         }
     }
 }
@@ -249,16 +216,9 @@ void User::setUserRoundKeys() {
 
     for (int i = 0; i < roundNum_; i++) {
         cout << "Round key [" << i << "] :";
-        cin >> rk; // Read the key as hexadecimal
+        getline(cin, rk);
 
-        // Input validation
-        if(cin.fail()) {
-            cin.clear(); // Clear error flags
-            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignore incorrect input
-            cout << "Invalid input. Please enter a hexadecimal number" << endl;
-            i--;
-            continue;
-        }
+
         string binrk, hexrk;
         bool padTo64 = rk.find("0x") == 0;
         if (padTo64) {
@@ -296,7 +256,7 @@ void User::generateRandomKey() {
 
 
 void User::setDataType() {
-    int choice;
+    string n;
 
     while (true) {
         cout << "< Data type setting >\n"
@@ -304,48 +264,33 @@ void User::setDataType() {
                 "1. Plaintext\n"
                 "2. File\n"
                 ">> ";
-        cin >> choice;
+        getline(cin, n);
 
-        if (cin.fail()) {
-            cin.clear();
-            // Correctly ignore characters until newline after failed input
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input\n" << endl;
-            continue;
+        if (n == "1") {
+            ptMode_ = true;
+            cout << "========== Plaintext mode selected\n" << endl;
+            setOutFile();
+            break;
         }
-
-        // Ignore newline left after reading choice
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-        switch (choice) {
-            case 1:
-                ptMode_ = true;
-                cout << "========== Plaintext mode selected\n" << endl;
-                cout << "Enter output file name:\n";
-                cout << ">> ";
-                getline(cin, outFile_); // Correctly wait for user input
-                cout << "========== Write to: " << outFile_ << "\n" << endl;
-                return;
-            case 2:
-                ptMode_ = false;
-                cout << "========== File mode selected\n" << endl;
-                // Assuming setInFile and setOutFile are correctly implemented
-                setInFile();
-                setOutFile();
-                return;
-            default:
-                cout << "Invalid input\n" << endl;
-                // No need for cin.ignore here; already done after cin >> choice
+        if (n == "2") {
+            ptMode_ = false;
+            cout << "========== File mode selected\n" << endl;
+            setInFile();
+            setOutFile();
+            break;
+        }
+        else {
+            cout << "Invalid input\n" << endl;
         }
     }
 }
+
 
 void User::setInFile() {
     cout << "Enter input file name: " << endl;
     cout << ">> ";
     getline(cin, inFile_);
     cout << "==========  Read from: " << inFile_ << "\n" << endl;
-
 }
 
 
@@ -354,6 +299,33 @@ void User::setOutFile() {
     cout << ">> ";
     getline(cin, outFile_);
     cout << "========== Write to: " << outFile_ << "\n" << endl;
+}
+
+
+bool User::wasPredefinedRoundKeys() {
+    string n;
+    while(true) {
+        cout << "< Checking predefined round keys >\n"
+                "Did you use predefined round keys?\n"
+                "1. No (program will generate for you based on your main Key)\n"
+                "2. Yes" << endl;
+        cout << ">> ";
+        getline(cin, n);
+
+        if (n == "1") {
+            keyFlag_ = keyFlag::DEFAULT;
+            cout << "========== Default selected \n" << endl;
+            return false;
+        }
+        if (n == "2") {
+            keyFlag_ = keyFlag::PRE_DEFINED;
+            cout << "========== Predefined selected \n" << endl;
+            return true;
+        }
+        else {
+            cout << "Invalid input\n" << endl;
+        }
+    }
 }
 
 
@@ -367,6 +339,7 @@ string User::getMainKey() const { return mainKey_; }
 int User::getRoundNum() const { return roundNum_; }
 int User::getKeyFlag() const { return keyFlag_; }
 vector<string> User::getRoundKeys() { return roundKeys_; }
+
 
 
 
