@@ -27,7 +27,6 @@ private:
 public:
     void processEncrypt(User& u);
     void processDecrypt(User& u);
-    void setPlainText(const string& prompt);
     void setInFileData(const string& inFile);
     void setOutFileData(const string& outFile);
     void addPadding(bool txt);

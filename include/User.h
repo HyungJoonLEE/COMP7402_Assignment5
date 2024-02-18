@@ -58,6 +58,7 @@ public:
     int getKeyFlag() const;
     string getMainKey() const;
     vector<string> getRoundKeys();
+    bool wasPredefinedRoundKeys();
 
 //    void setMode(string m) { mode_ = m; }
 //    void setInFile(string s) { inFile_ = s; }

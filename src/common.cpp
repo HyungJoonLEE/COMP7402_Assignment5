@@ -8,15 +8,35 @@ vector<string> PREDEFINED_ROUND_KEYS {"0xdddddddd", "0xeeeeeeee",
                                       "0xbbbbbbbb", "0xeeeeeeee",
                                       "0xeeeeeeee", "0xffffffff"};
 
-string hexToBin(const string& hex) {
-    string binStr;
 
-    for (size_t i = 0; i < hex.length(); i += 2) {
-        string byteString = hex.substr(i, 2);
-        char byte = static_cast<char>(strtol(byteString.c_str(), nullptr, 16));
-        for (int j = 7; j >= 0; --j) {
-            binStr.push_back((byte & (1 << j)) ? '1' : '0');
-        }
+
+string hexCharToBin(char hexChar) {
+    switch(hexChar) {
+        case '0': return "0000";
+        case '1': return "0001";
+        case '2': return "0010";
+        case '3': return "0011";
+        case '4': return "0100";
+        case '5': return "0101";
+        case '6': return "0110";
+        case '7': return "0111";
+        case '8': return "1000";
+        case '9': return "1001";
+        case 'A': case 'a': return "1010";
+        case 'B': case 'b': return "1011";
+        case 'C': case 'c': return "1100";
+        case 'D': case 'd': return "1101";
+        case 'E': case 'e': return "1110";
+        case 'F': case 'f': return "1111";
+        default: return ""; // invalid input
+    }
+}
+
+
+string hexToBin(const string& hexStr) {
+    string binStr = "";
+    for (char hexChar : hexStr) {
+        binStr += hexCharToBin(hexChar);
     }
     return binStr;
 }
@@ -127,24 +147,45 @@ void appendToFile(const string& filename, const string& hex) {
 }
 
 
-string readHexDataFromFile(const string& filename) {
-    ifstream file(filename);
-    if (!file) {
-        cerr << "Failed to open file: " << filename << endl;
-        return "";
+string readPlainText(const string& prompt) {
+    string input;
+
+    cout << prompt;
+    getline(cin, input);
+    return input;
+}
+
+
+string readFile(const string& filename) {
+    if (isTxt(filename)) {
+        ifstream file(filename);
+        if (!file.is_open()) {
+            cerr << "Failed to open file: " << filename << endl;
+            return "";
+        }
+
+        stringstream buffer;
+        buffer << file.rdbuf(); // Read the file into the buffer
+
+        return buffer.str();
     }
+    else {
+        ifstream file(filename, ios::binary);
+        if (!file) {
+            cerr << "Cannot open file." << endl;
+            return "";
+        }
 
-    stringstream buffer;
-    string hexData;
+        stringstream hexStream;
+        char byte;
+        // Read each byte from the file
+        while (file.read(&byte, 1)) {
+            // Convert each byte to hexadecimal and append to the stringstream
+            hexStream << hex << setw(2) << setfill('0') << (0xFF & static_cast<int>(byte));
+        }
 
-    // Read the file line by line
-    while (getline(file, hexData)) {
-        // Append each line of hex data to the stringstream
-        buffer << hexData;
+        return hexStream.str();
     }
-
-    // Convert the stringstream to a string and return it
-    return buffer.str();
 }
 
 
@@ -170,7 +211,7 @@ string hexToASCII(const string& hexStr) {
 }
 
 
-string removeTrailingZeros(string binStr, const std::string& sequence) {
+string removeTrailingZeros(string binStr, const string& sequence) {
     size_t position = binStr.find(sequence);
     if (position != string::npos) {
         // Erase the sequence and everything that follows
@@ -178,3 +219,4 @@ string removeTrailingZeros(string binStr, const std::string& sequence) {
     }
     return binStr; // Re
 }
+

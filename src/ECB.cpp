@@ -2,29 +2,40 @@
 
 
 void ECB::processEncrypt(User& u) {
-    hexData_.reserve(10000);
-    encData_.reserve(10000);
-    binData_.reserve(10000);
+    hexData_.reserve(4000);
+    binData_.reserve(16000);
 
-    if (u.isPlainTextMode()) setPlainText("Enter plain text: ");
-    else {
-        hexData_ = readHexDataFromFile(u.getInFile());
+    string data;
+    string bindata;
+
+    if (u.isPlainTextMode()) {
+        data = readPlainText("Enter plain text: ");
+        hexData_ = strToHex(data);
+        addPadding(false);
     }
-    addPadding(isTxt(u.getInFile()));
-    cout << "hex data: "<< hexData_ << endl;
+    else {
+        data = readFile(u.getInFile());
+        hexData_ = strToHex(data);
+        addPadding(isTxt(u.getInFile()));
+    }
+    cout << hexData_ << endl;
 
     if (u.getKeyFlag() == DEFAULT)
         generateRoundKeys(u.getMainKey(), u.getRoundNum());
-    else
-        roundKeys_ = u.getRoundKeys();
+    else {
+        for (const auto &rk: u.getRoundKeys()) {
+            roundKeys_.push_back(rk);
+        }
+    }
 
-    binData_ = strToBin(hexData_);
+    binData_ = hexToBin(hexData_);
+    cout << binData_ << endl;
     for (int i = 0; i < binData_.length(); i += 64) {
-        string binData = binData_.substr(i, 64);
-        string cipherBin = Feistel(u.getRoundNum(), binData, roundKeys_);
+        string bin = binData_.substr(i, 64);
+        string cipherBin = Feistel(u.getRoundNum(), bin, roundKeys_);
         cout << "encrypt: " << binToHex(cipherBin) << endl;
         appendToFile(u.getOutFile(), binToHex(cipherBin));
-        binData.clear();
+        bin.clear();
         cipherBin.clear();
     }
 }
@@ -34,41 +45,33 @@ void ECB::processDecrypt(User &u) {
     hexData_.reserve(10000);
     encData_.reserve(10000);
     binData_.reserve(10000);
+    string data;
 
-    generateRoundKeys(u.getMainKey(), u.getRoundNum());
-    generateReverseRoundKeys(roundKeys_);
-    hexData_ = readHexDataFromFile(u.getInFile());
-//    encData_ = readHexDataFromFile(u.getInFile());
-
-    string binData_ = hexToBin(hexData_);
-    for (int i = 0; i < binData_.length(); i += 64) {
-        string binData = binData_.substr(i, 64);
-        string decryptBin = Feistel(u.getRoundNum(), binData, reverseRoundKeys_);
-        cout << decryptBin << endl;
-        if (i >= binData_.length() - 64) {
-            decryptBin =  removeTrailingZeros(decryptBin, "00000000");
+    if (u.getKeyFlag() == PRE_DEFINED) {
+        for (const auto& rk : u.getRoundKeys()) {
+            roundKeys_.push_back(rk);
         }
-        appendToFile(u.getOutFile(), hexToASCII(binToHex(decryptBin)));
-        binData.clear();
-        decryptBin.clear();
     }
-}
-
-
-void ECB::setPlainText(const string& prompt) {
-    string input;
-    stringstream hexStream;
-
-    cout << prompt;
-    getline(cin, input);
-
-    for (unsigned char c : input) {
-        hexStream.str("");
-        hexStream.clear();
-        hexStream << hex << setw(2) << setfill('0') << static_cast<int>(c);
-
-        hexData_ += hexStream.str();
+    else {
+        generateRoundKeys(u.getMainKey(), u.getRoundNum());
     }
+    generateReverseRoundKeys(roundKeys_);
+    hexData_ = readFile(u.getInFile());
+    cout << "size: " <<  hexData_.size() << endl;
+//    encData_ = readHexDataFromFile(u.getInFile());
+//
+//    binData_ = hexToBin(hexData_);
+//    for (int i = 0; i < binData_.length(); i += 64) {
+//        string binData = binData_.substr(i, 64);
+//        string decryptBin = Feistel(u.getRoundNum(), binData, reverseRoundKeys_);
+//        cout << decryptBin << endl;
+//        if (i >= binData_.length() - 64) {
+//            decryptBin =  removeTrailingZeros(decryptBin, "00000000");
+//        }
+//        appendToFile(u.getOutFile(), hexToASCII(binToHex(decryptBin)));
+//        binData.clear();
+//        decryptBin.clear();
+//    }
 }
 
 

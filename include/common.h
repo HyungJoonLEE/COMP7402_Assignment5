@@ -19,6 +19,7 @@ using namespace std;
 
 extern vector<string> PREDEFINED_ROUND_KEYS;
 
+string hexCharToBin(char hexChar);
 string hexToBin(const string& hex);
 string binToHex(const string& binary);
 string XOR_binary(const string& a, const string& b);
@@ -28,7 +29,8 @@ string decToBin(int decimal);
 int binToDec(string binary);
 string strToBin(const string& input);
 void appendToFile(const string& filename, const string& hex);
-string readHexDataFromFile(const string& filename);
+string readFile(const string& filename);
+string readPlainText(const string& prompt);
 bool isTxt(const std::string& filename);
 string hexToASCII(const string& hexStr);
 void processHexFile(const std::string& filePath);
