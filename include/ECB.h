@@ -29,9 +29,8 @@ public:
     void processDecrypt(User& u);
     void setInFileData(const string& inFile);
     void setOutFileData(const string& outFile);
-    void addPadding(bool txt);
-    void generateRoundKeys(string key, int round);
-    void generateReverseRoundKeys(const vector<string>& rkv);
+    void generateRoundKeys(string key, int round, bool pre);
+    void generateReverseRoundKeys(const vector<string>& rkv, int round);
     string Feistel(unsigned int round,  const string& bin, const vector<string>& rk);
 
     // Function to do a circular left shift by 1
@@ -40,7 +39,6 @@ public:
     // Function to do a circular left shift by 2
     string shift_left_twice(string key_chunk);
 
-    void processDecrypt();
 };
 
 static int pc1[56] = {

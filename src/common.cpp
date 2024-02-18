@@ -1,4 +1,4 @@
-#include "Common.h"
+#include "common.h"
 
 
 using namespace std;
@@ -28,13 +28,13 @@ string hexCharToBin(char hexChar) {
         case 'D': case 'd': return "1101";
         case 'E': case 'e': return "1110";
         case 'F': case 'f': return "1111";
-        default: return ""; // invalid input
+        default: return "";
     }
 }
 
 
 string hexToBin(const string& hexStr) {
-    string binStr = "";
+    string binStr;
     for (char hexChar : hexStr) {
         binStr += hexCharToBin(hexChar);
     }
@@ -43,20 +43,20 @@ string hexToBin(const string& hexStr) {
 
 
 string binToHex(const string& binary) {
-//    string hexStr;
-//    for (size_t i = 0; i < binary.length(); i += 8) {
-//        bitset<8> eightBits(binary.substr(i, 8));
-//        stringstream ss;
-//        ss << hex << setw(2) << setfill('0') << eightBits.to_ulong();
-//        hexStr += ss.str();
-//    }
-//    return hexStr;
-    stringstream ss;
-    for (size_t i = 0; i < binary.length(); i += 4) {
-        bitset<4> bs(binary.substr(i, 4));
-        ss << hex << bs.to_ulong();
+    string hexStr;
+    for (size_t i = 0; i < binary.length(); i += 8) {
+        bitset<8> eightBits(binary.substr(i, 8));
+        stringstream ss;
+        ss << hex << setw(2) << setfill('0') << eightBits.to_ulong();
+        hexStr += ss.str();
     }
-    return ss.str();
+    return hexStr;
+//    stringstream ss;
+//    for (size_t i = 0; i < binary.length(); i += 4) {
+//        bitset<4> bs(binary.substr(i, 4));
+//        ss << hex << bs.to_ulong();
+//    }
+//    return ss.str();
 }
 
 
@@ -156,19 +156,26 @@ string readPlainText(const string& prompt) {
 }
 
 
-string readFile(const string& filename) {
+string readFile(const string& filename, bool enc) {
     if (isTxt(filename)) {
         ifstream file(filename);
+        string line;
+        string data;
+
         if (!file.is_open()) {
             cerr << "Failed to open file: " << filename << endl;
             return "";
         }
 
-        stringstream buffer;
-        buffer << file.rdbuf(); // Read the file into the buffer
+        // Read file line by line
+        while (getline(file, line)) {
+            data += line;
+        }
 
-        return buffer.str();
+        file.close();
+        return data;
     }
+
     else {
         ifstream file(filename, ios::binary);
         if (!file) {
@@ -184,6 +191,7 @@ string readFile(const string& filename) {
             hexStream << hex << setw(2) << setfill('0') << (0xFF & static_cast<int>(byte));
         }
 
+        file.close();
         return hexStream.str();
     }
 }
@@ -220,3 +228,60 @@ string removeTrailingZeros(string binStr, const string& sequence) {
     return binStr; // Re
 }
 
+
+void addPadding(bool txt, string& hex) {
+    if (txt) {
+        int padding = 8 - (int) hex.size() % 8;
+        for (int i = 0; i < padding; ++i) {
+            hex += '\0';
+        }
+    }
+    else {
+        int padding = (16 - (int)hex.size() % 16) / 2 ;
+        if (padding != 16) {
+            for (int i = 0; i < padding; ++i) {
+                hex += "00";
+            }
+        }
+    }
+}
+
+
+// Function to convert a single hex character to its decimal value
+unsigned char hexCharToValue(char hexChar) {
+    if (hexChar >= '0' && hexChar <= '9')
+        return hexChar - '0';
+    if (hexChar >= 'a' && hexChar <= 'f')
+        return 10 + hexChar - 'a';
+    if (hexChar >= 'A' && hexChar <= 'F')
+        return 10 + hexChar - 'A';
+    throw invalid_argument("Invalid hex character");
+}
+
+
+vector<unsigned char> hexStringToBinary(const string& hexString) {
+    vector<unsigned char> binaryData;
+    for (size_t i = 0; i < hexString.length(); i += 2) {
+        unsigned char value = hexCharToValue(hexString[i]) * 16 + hexCharToValue(hexString[i + 1]);
+        binaryData.push_back(value);
+    }
+    return binaryData;
+}
+
+
+string binaryDataToHexString(const vector<unsigned char>& binaryData) {
+    ostringstream oss;
+    oss << hex << setfill('0');
+    for (unsigned char byte : binaryData) {
+        oss << setw(2) << static_cast<int>(byte) << " ";
+    }
+    return oss.str();
+}
+
+
+void printRoundKeys(vector<string> rks) {
+    cout << "< Round Keys >" << endl;
+    for (int i = 0; i < rks.size(); i++) {
+        cout << hex << "Round Key " << i + 1 << " : " << rks[i]  << endl;
+    }
+}

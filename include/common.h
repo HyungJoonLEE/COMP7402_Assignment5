@@ -29,11 +29,19 @@ string decToBin(int decimal);
 int binToDec(string binary);
 string strToBin(const string& input);
 void appendToFile(const string& filename, const string& hex);
-string readFile(const string& filename);
+string readFile(const string& filename, bool enc);
 string readPlainText(const string& prompt);
-bool isTxt(const std::string& filename);
+bool isTxt(const string& filename);
 string hexToASCII(const string& hexStr);
-void processHexFile(const std::string& filePath);
-string removeTrailingZeros(string binStr, const std::string& sequence);
+void processHexFile(const string& filePath);
+string removeTrailingZeros(string binStr, const string& sequence);
+void addPadding(bool txt, string& hex);
+void printRoundKeys(vector<string> rks);
+
+
+
+unsigned char hexCharToValue(char hexChar);
+vector<unsigned char> hexStringToBinary(const string& hexString);
+string binaryDataToHexString(const vector<unsigned char>& binaryData);
 
 #endif //COMP7402_ASSIGNMENT5_COMMON_H

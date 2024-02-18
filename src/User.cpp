@@ -207,7 +207,7 @@ void User::setPredefinedRoundKeys() {
         string binrk = keyHexToBinary(cut0x, true);
         roundKeys_.push_back(binrk);
     }
-    printRoundKeys();
+//    printRoundKeys();
 }
 
 
@@ -230,17 +230,7 @@ void User::setUserRoundKeys() {
         }
         roundKeys_.push_back(binrk); // Add the key to the vector
     }
-    printRoundKeys();
-}
-
-
-void User::printRoundKeys() {
-    cout << "< Round Keys >" << endl;
-    for (int i = 0; i < roundKeys_.size(); i++) {
-        cout << hex << "Round Key " << i + 1 << " : " << roundKeys_[i]
-            << " = 0x" << binToHex(roundKeys_[i]) << endl;
-    }
-    cout << endl;
+//    printRoundKeys();
 }
 
 

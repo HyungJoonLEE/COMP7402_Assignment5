@@ -45,7 +45,6 @@ protected:
     void setOutFile();
 
     void setPredefinedRoundKeys();
-    void printRoundKeys();
 public:
     void setEnvironment();
 
