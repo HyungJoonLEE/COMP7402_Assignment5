@@ -57,12 +57,17 @@ void ECB::processDecrypt(User &u) {
 
     bindata = hexToBin(hexdata);
 
+    cout << "Before decrypt: " << bindata << endl;
+
     for (int i = 0; i < bindata.length(); i += 64) {
         string bin = bindata.substr(i, 64);
         string decryptBin = Feistel(u.getRoundNum(), bin, reverseRoundKeys_);
+        cout << "After encrypt: " << decryptBin << endl;
+
         if (bin.size() <= 64) {
-            decryptBin =  removeTrailingZeros(decryptBin, "00000000");
+            decryptBin =  removeTrailingZeros(decryptBin);
         }
+        cout << "After remove: " << decryptBin << endl;
         appendToFile(u.getOutFile(), hexToASCII(binToHex(decryptBin)));
     }
 }
@@ -231,10 +236,10 @@ string ECB::Feistel(unsigned int round, const string& bin, const vector<string>&
             binR = xored;
             binL = temp;
         }
-//        cout << "Round " << i + 1 << ": "
-//             << "L" << i + 1 << ": " << binToHex(binL) << "  "
-//             << "R" << i + 1 << ": " << binToHex(binR) << "  "
-//             << "Round Key: " << binToHex(rk[i]) << endl;
+        cout << "Round " << i + 1 << ": "
+             << "L" << i + 1 << ": " << binToHex(binL) << "  "
+             << "R" << i + 1 << ": " << binToHex(binR) << "  "
+             << "Round Key: " << binToHex(rk[i]) << endl;
     }
 
     // The halves of the plain text are applied
@@ -246,7 +251,6 @@ string ECB::Feistel(unsigned int round, const string& bin, const vector<string>&
         ciphertext += combined[i - 1];
     }
 
-    //And we finally get the cipher text
     return ciphertext;
 }
 

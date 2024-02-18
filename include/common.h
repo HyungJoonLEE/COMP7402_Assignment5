@@ -34,7 +34,7 @@ string readPlainText(const string& prompt);
 bool isTxt(const string& filename);
 string hexToASCII(const string& hexStr);
 void processHexFile(const string& filePath);
-string removeTrailingZeros(string binStr, const string& sequence);
+string removeTrailingZeros(string binStr);
 void addPadding(bool txt, string& hex);
 void printRoundKeys(vector<string> rks);
 

@@ -219,13 +219,20 @@ string hexToASCII(const string& hexStr) {
 }
 
 
-string removeTrailingZeros(string binStr, const string& sequence) {
-    size_t position = binStr.find(sequence);
-    if (position != string::npos) {
-        // Erase the sequence and everything that follows
-        return binStr.substr(0, position);
+string removeTrailingZeros(string binStr) {
+    string result;
+    string pattern = "00000000"; // Pattern to remove
+    for (size_t i = 0; i < binStr.length(); ) {
+        // If we find a sequence of eight '0's, we skip it
+        if (i + 8 <= binStr.length() && binStr.substr(i, 8) == pattern) {
+            i += 8; // Move past this block of '0's
+        } else {
+            // Otherwise, copy the current character to the result
+            result += binStr[i];
+            i++;
+        }
     }
-    return binStr; // Re
+    return result;
 }
 
 
