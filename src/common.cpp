@@ -254,11 +254,15 @@ string removeTrailingZeros(string binStr) {
 }
 
 
-void addPadding(string& hex) {
+int addPadding(string& hex) {
+    int count;
     int padding = 16 - (int) hex.size() % 16;
+    if (padding == 0) return 0;
     for (int i = 0; i < padding; ++i) {
         hex += "0";
+        count++;
     }
+    return count;
 }
 
 
@@ -345,4 +349,17 @@ int hexCharToValue(char hexChar) {
     if (hexChar >= 'a' && hexChar <= 'f') return 10 + (hexChar - 'a');
     if (hexChar >= 'A' && hexChar <= 'F') return 10 + (hexChar - 'A');
     return 0;
+}
+
+
+
+void cutLastPadding(string& binary, int n) {
+    if (n <= 0) return; // If n is not positive, do nothing
+
+    // Ensure we do not try to erase more characters than the string contains
+    if (n > static_cast<int>(binary.size())) {
+        binary.clear(); // If n is larger than the string length, clear the string
+    } else {
+        binary.erase(binary.size() - n); // Erase the last n characters
+    }
 }

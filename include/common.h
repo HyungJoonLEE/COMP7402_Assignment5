@@ -35,10 +35,11 @@ string readPlainText(const string& prompt);
 bool isTxt(const string& filename);
 string hexToASCII(const string& hexStr);
 string removeTrailingZeros(string binStr);
-void addPadding(string& hex);
+int addPadding(string& hex);
 void runDD(const string& originFileName, const string& encryptedFileName);
 void printRoundKeys(vector<string> rks);
 int hexCharToValue(char hexChar);
+void cutLastPadding(string& binary, int n);
 
 struct BMPHeader {
     uint16_t file_type{0x4D42};          // File type always BM which is 0x4D42

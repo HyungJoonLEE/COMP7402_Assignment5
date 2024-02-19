@@ -29,12 +29,16 @@ void ECB::processEncrypt(User& u) {
     else
         generateRoundKeys(u.getMainKey(), u.getRoundNum(), false);
 
-    addPadding(hexdata);
+    int padding = addPadding(hexdata);
+//    cout << "hex: " <<  hexdata << endl;
     bindata = hexToBin(hexdata);
 
     for (int i = 0; i < bindata.length(); i += 64) {
         string bin = bindata.substr(i, 64);
         string cipherBin = Feistel(u.getRoundNum(), bin, roundKeys_);
+        if (i + 64 >= bindata.length() && !isTxt(u.getOutFile())) {
+            cutLastPadding(cipherBin, padding * 4);
+        }
         appendToFile(u.getOutFile(), binToHex(cipherBin));
         bin.clear();
         cipherBin.clear();
@@ -49,6 +53,7 @@ void ECB::processEncrypt(User& u) {
 void ECB::processDecrypt(User &u) {
     string bindata;
     string hexdata;
+    int padding;
 
     hexdata.reserve(200000);
     bindata.reserve(800000);
@@ -62,15 +67,21 @@ void ECB::processDecrypt(User &u) {
 
     hexdata = readFile(u.getInFile());
 
-    bindata = hexToBin(hexdata);
+    if (!(isTxt(u.getInFile()))) {
+        padding = addPadding(hexdata);
+    }
 
+    bindata = hexToBin(hexdata);
 
     for (int i = 0; i < bindata.length(); i += 64) {
         string bin = bindata.substr(i, 64);
         string decryptBin = Feistel(u.getRoundNum(), bin, reverseRoundKeys_);
 
-        if (bin.size() <= 64) {
+        if (bin.size() <= 64 && isTxt(u.getInFile())) {
             decryptBin =  removeTrailingZeros(decryptBin);
+        }
+        if (i + 64 >= bindata.length() && !isTxt(u.getInFile())) {
+            cutLastPadding(decryptBin, padding * 4);
         }
         if (isTxt(u.getInFile())) {
             appendToFile(u.getOutFile(), hexToASCII(binToHex(decryptBin)));
