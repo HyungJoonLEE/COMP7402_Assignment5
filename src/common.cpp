@@ -200,16 +200,16 @@ string readFile(const string& filename) {
             return "";
         }
 
+        vector<unsigned char> buffer(istreambuf_iterator<char>(file), {});
+
         stringstream hexStream;
-        char byte[2];
-        while (file.read(byte, 2)) {
-//            swap(byte[0], byte[1]);
-            for (char i : byte) {
-                hexStream << hex << setw(2) << setfill('0') << (0xFF & static_cast<int>(i));
-            }
+
+        for (unsigned char byte : buffer) {
+            hexStream << hex << setw(2) << setfill('0') << static_cast<int>(byte);
         }
 
         file.close();
+
         return hexStream.str();
     }
 }

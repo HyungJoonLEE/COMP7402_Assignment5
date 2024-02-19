@@ -86,43 +86,6 @@ void ECB::processDecrypt(User &u) {
 }
 
 
-
-void ECB::setInFileData(const string &inFile) {
-    char byte;
-
-    ifstream file(inFile, ios::binary);
-    if (!file.is_open()) {
-        cerr << "Failed to open file: " << inFile << endl;
-        return;
-    }
-
-    while (file.read(&byte, sizeof(byte))) {
-        stringstream hexStream;
-        hexStream << hex << setw(2) << setfill('0') << (0xFF & static_cast<int>(byte));
-        hexData_ += hexStream.str();
-    }
-
-    file.close();
-}
-
-
-void ECB::setOutFileData(const string &outFile) {
-    ofstream file(outFile);
-
-    if (!file.is_open()) {
-        cerr << "Failed to open output file: " << outFile << endl;
-        return;
-    }
-
-    for (const auto& hexStr : encData_) {
-        file << hexStr << " ";
-    }
-
-    file.close();
-    cout << "Hexadecimal data successfully saved to: " << outFile << endl;
-}
-
-
 void ECB::generateRoundKeys(string key, int round, bool flag) {
     int count = 0;
     if (flag) {

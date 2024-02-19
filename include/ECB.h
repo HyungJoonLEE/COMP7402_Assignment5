@@ -27,16 +27,11 @@ private:
 public:
     void processEncrypt(User& u);
     void processDecrypt(User& u);
-    void setInFileData(const string& inFile);
-    void setOutFileData(const string& outFile);
+
     void generateRoundKeys(string key, int round, bool pre);
     void generateReverseRoundKeys(const vector<string>& rkv, int round);
     string Feistel(unsigned int round,  const string& bin, const vector<string>& rk);
-
-    // Function to do a circular left shift by 1
     string shift_left_once(string key_chunk);
-
-    // Function to do a circular left shift by 2
     string shift_left_twice(string key_chunk);
 
 };
