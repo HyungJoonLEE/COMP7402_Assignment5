@@ -14,9 +14,9 @@ file(GLOB_RECURSE PROJECT_FILES
         "${SOURCE_DIR}/*.c"
         )
 
-add_executable(${PROJECT_NAME} ${PROJECT_FILES})
+add_executable("Feistel" ${PROJECT_FILES})
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIR})
+target_include_directories("Feistel" PRIVATE ${INCLUDE_DIR})
 #target_link_libraries(${PROJECT_NAME} PRIVATE ssl crypto)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+target_compile_features("Feistel" PRIVATE cxx_std_17)
 
