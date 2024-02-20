@@ -1,9 +1,8 @@
 #ifndef COMP7402_ASSIGNMENT5_KEY_H
 #define COMP7402_ASSIGNMENT5_KEY_H
 
-#include "User.h"
-#include "Key.h"
 #include <string>
+#include <vector>
 
 using namespace std;
 

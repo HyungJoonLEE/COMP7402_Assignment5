@@ -1,5 +1,5 @@
-#ifndef COMP7402_ASSIGNMENT5_ECB_H
-#define COMP7402_ASSIGNMENT5_ECB_H
+#ifndef COMP7402_ASSIGNMENT5_FEISTEL_H
+#define COMP7402_ASSIGNMENT5_FEISTEL_H
 
 #include <iostream>
 #include <fstream>
@@ -13,16 +13,23 @@
 #include <algorithm>
 #include <cctype>
 #include "User.h"
+#include "Key.h"
 
 using namespace std;
 
-class ECB {
+class Feistel {
 private:
+    string data_;
+    string hexdata_;
+    string bindata_;
 public:
-    void processEncrypt(User& u);
-    void processDecrypt(User& u);
+    Feistel();
+    void initializeData(User& u);
+    void initializeRoundKeys(User& u, Key& k);
+    void ECBencrypt(User& u);
+    void ECBdecrypt(User& u);
 
-    string Feistel(unsigned int round,  const string& bin, const vector<string>& rk);
+    static string feistel(unsigned int round,  const string& bin, const vector<string>& rk);
 };
 
 
@@ -124,4 +131,4 @@ static int inverse_permutation[64]= {
 };
 
 
-#endif //COMP7402_ASSIGNMENT5_ECB_H
+#endif //COMP7402_ASSIGNMENT5_FEISTEL_H

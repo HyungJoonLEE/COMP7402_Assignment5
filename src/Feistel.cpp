@@ -1,47 +1,32 @@
-#include "ECB.h"
+#include "Feistel.h"
 #include "Key.h"
 
 
-void ECB::processEncrypt(User& u) {
+Feistel::Feistel() {
+    data_.reserve(100000);
+    hexdata_.reserve(200000);
+    bindata_.reserve(8000000);
+}
+
+
+void Feistel::ECBencrypt(User& u) {
     Key mkey;
-    string data, hexdata, bindata;
     int padding;
 
-    data.reserve(100000);
-    hexdata.reserve(200000);
-    bindata.reserve(8000000);
-
     // Input data plain text or file
-    if (u.isPlainTextMode()) {
-        data = readPlainText("Enter plain text: ");
-        hexdata = strToHex(data);
-    }
-    else {
-        if (isTxt(u.getInFile())) {
-            data = readFile(u.getInFile());
-            hexdata = strToHex(data);
-        }
-        else {
-            hexdata = readFile(u.getInFile());
-        }
-    }
+    initializeData(u);
 
-    padding = addPadding(hexdata);
-    bindata = hexToBin(hexdata);
-
+    padding = addPadding(hexdata_);
+    bindata_ = hexToBin(hexdata_);
 
     // Key gen
-    if (u.getKeyFlag() == PRE_DEFINED)
-        mkey.generateRoundKeys(u.getMainKey(), u.getRoundNum(), true);
-    else
-        mkey.generateRoundKeys(u.getMainKey(), u.getRoundNum(), false);
-
+    initializeRoundKeys(u, mkey);
 
     // Feistel process
-    for (int i = 0; i < bindata.length(); i += 64) {
-        string bin = bindata.substr(i, 64);
-        string cipherBin = Feistel(u.getRoundNum(), bin, mkey.getRK());
-        if (i + 64 >= bindata.length() && !isTxt(u.getOutFile())) {
+    for (int i = 0; i < bindata_.length(); i += 64) {
+        string bin = bindata_.substr(i, 64);
+        string cipherBin = feistel(u.getRoundNum(), bin, mkey.getRK());
+        if (i + 64 >= bindata_.length() && !isTxt(u.getOutFile())) {
             cutLastPadding(cipherBin, padding * 4);
         }
         appendToFile(u.getOutFile(), binToHex(cipherBin));
@@ -56,40 +41,32 @@ void ECB::processEncrypt(User& u) {
 }
 
 
-void ECB::processDecrypt(User &u) {
+void Feistel::ECBdecrypt(User &u) {
     Key mkey;
-    string bindata;
-    string hexdata;
     int padding;
 
-    hexdata.reserve(200000);
-    bindata.reserve(800000);
+    initializeRoundKeys(u, mkey);
 
-    if (u.getKeyFlag() == PRE_DEFINED)
-        mkey.generateRoundKeys(u.getMainKey(), u.getRoundNum(), true);
-    else
-        mkey.generateRoundKeys(u.getMainKey(), u.getRoundNum(), false);
-
-    mkey.generateReverseRoundKeys(mkey.getRK(), u.getRoundNum());
-
-    hexdata = readFile(u.getInFile());
-
-    if (!(isTxt(u.getInFile()))) {
-        padding = addPadding(hexdata);
+    hexdata_ = readFile(u.getInFile());
+    if (!isTxt(u.getInFile())) {
+        padding = addPadding(hexdata_);
     }
+    bindata_ = hexToBin(hexdata_);
 
-    bindata = hexToBin(hexdata);
+    for (int i = 0; i < bindata_.length(); i += 64) {
+        string bin = bindata_.substr(i, 64);
+        string decryptBin = feistel(u.getRoundNum(), bin, mkey.getRRK());
 
-    for (int i = 0; i < bindata.length(); i += 64) {
-        string bin = bindata.substr(i, 64);
-        string decryptBin = Feistel(u.getRoundNum(), bin, mkey.getRRK());
-
+        // If data was from .txt file
         if (bin.size() <= 64 && isTxt(u.getInFile())) {
             decryptBin =  removeTrailingZeros(decryptBin);
         }
-        if (i + 64 >= bindata.length() && !isTxt(u.getInFile())) {
+
+        // If data was from other file
+        if (i + 64 >= bindata_.length() && !isTxt(u.getInFile())) {
             cutLastPadding(decryptBin, padding * 4);
         }
+
         if (isTxt(u.getInFile())) {
             appendToFile(u.getOutFile(), hexToASCII(binToHex(decryptBin)));
         }
@@ -97,14 +74,13 @@ void ECB::processDecrypt(User &u) {
             appendToFile(u.getOutFile(), binToHex(decryptBin));
         }
     }
-
     if (!isTxt(u.getInFile())) {
         runDD(u.getInFile(), u.getOutFile());
     }
 }
 
 
-string ECB::Feistel(unsigned int round, const string& bin, const vector<string>& rk) {
+string Feistel::feistel(unsigned int round, const string& bin, const vector<string>& rk) {
 
     // Permutation1 appliex
     string perm;
@@ -183,5 +159,30 @@ string ECB::Feistel(unsigned int round, const string& bin, const vector<string>&
     }
 
     return ciphertext;
+}
+
+
+void Feistel::initializeData(User &u) {
+    if (u.isPlainTextMode()) {
+        data_ = readPlainText("Enter plain text: ");
+        hexdata_ = strToHex(data_);
+    }
+    else {
+        if (isTxt(u.getInFile())) {
+            data_ = readFile(u.getInFile());
+            hexdata_ = strToHex(data_);
+        }
+        else {
+            hexdata_ = readFile(u.getInFile());
+        }
+    }
+}
+
+
+void Feistel::initializeRoundKeys(User &u, Key &k) {
+    bool isPreDefined = (u.getKeyFlag() == PRE_DEFINED);
+    k.generateRoundKeys(u.getMainKey(), u.getRoundNum(), isPreDefined);
+    if (!u.isEncryption())
+        k.generateReverseRoundKeys(k.getRK(), u.getRoundNum());
 }
 
