@@ -1,7 +1,9 @@
 #include "ECB.h"
+#include "Key.h"
 
 
 void ECB::processEncrypt(User& u) {
+    Key mkey;
     string data;
     string hexdata;
     string bindata;
@@ -24,10 +26,11 @@ void ECB::processEncrypt(User& u) {
         }
     }
 
+
     if (u.getKeyFlag() == PRE_DEFINED)
-        generateRoundKeys(u.getMainKey(), u.getRoundNum(), true);
+        mkey.generateRoundKeys(u.getMainKey(), u.getRoundNum(), true);
     else
-        generateRoundKeys(u.getMainKey(), u.getRoundNum(), false);
+        mkey.generateRoundKeys(u.getMainKey(), u.getRoundNum(), false);
 
     int padding = addPadding(hexdata);
 //    cout << "hex: " <<  hexdata << endl;
@@ -35,7 +38,7 @@ void ECB::processEncrypt(User& u) {
 
     for (int i = 0; i < bindata.length(); i += 64) {
         string bin = bindata.substr(i, 64);
-        string cipherBin = Feistel(u.getRoundNum(), bin, roundKeys_);
+        string cipherBin = Feistel(u.getRoundNum(), bin, mkey.getRK());
         if (i + 64 >= bindata.length() && !isTxt(u.getOutFile())) {
             cutLastPadding(cipherBin, padding * 4);
         }
@@ -51,6 +54,7 @@ void ECB::processEncrypt(User& u) {
 
 
 void ECB::processDecrypt(User &u) {
+    Key mkey;
     string bindata;
     string hexdata;
     int padding;
@@ -59,11 +63,11 @@ void ECB::processDecrypt(User &u) {
     bindata.reserve(800000);
 
     if (u.getKeyFlag() == PRE_DEFINED)
-        generateRoundKeys(u.getMainKey(), u.getRoundNum(), true);
+        mkey.generateRoundKeys(u.getMainKey(), u.getRoundNum(), true);
     else
-        generateRoundKeys(u.getMainKey(), u.getRoundNum(), false);
+        mkey.generateRoundKeys(u.getMainKey(), u.getRoundNum(), false);
 
-    generateReverseRoundKeys(roundKeys_, u.getRoundNum());
+    mkey.generateReverseRoundKeys(mkey.getRK(), u.getRoundNum());
 
     hexdata = readFile(u.getInFile());
 
@@ -75,7 +79,7 @@ void ECB::processDecrypt(User &u) {
 
     for (int i = 0; i < bindata.length(); i += 64) {
         string bin = bindata.substr(i, 64);
-        string decryptBin = Feistel(u.getRoundNum(), bin, reverseRoundKeys_);
+        string decryptBin = Feistel(u.getRoundNum(), bin, mkey.getRRK());
 
         if (bin.size() <= 64 && isTxt(u.getInFile())) {
             decryptBin =  removeTrailingZeros(decryptBin);
@@ -94,82 +98,6 @@ void ECB::processDecrypt(User &u) {
     if (!isTxt(u.getInFile())) {
         runDD(u.getInFile(), u.getOutFile());
     }
-}
-
-
-void ECB::generateRoundKeys(string key, int round, bool flag) {
-    int count = 0;
-    if (flag) {
-        roundKeys_.emplace_back("000000000000000011011101110111011101110111011101");
-        roundKeys_.emplace_back("000000000000000011101110111011101110111011101110");
-        roundKeys_.emplace_back("000000000000000010101010101010101010101010101010");
-        roundKeys_.emplace_back("000000000000000011011101110111011101110111011101");
-        roundKeys_.emplace_back("000000000000000010111011101110111011101110111011");
-        roundKeys_.emplace_back("000000000000000011101110111011101110111011101110");
-        roundKeys_.emplace_back("000000000000000011101110111011101110111011101110");
-        roundKeys_.emplace_back("000000000000000011111111111111111111111111111111");
-    }
-    else {
-        // 1. Compressing the key using the PC1 table
-        string perm_key;
-        for (int i : pc1) {
-            perm_key += key[i - 1];
-        }
-        // 2. Dividing the key into two equal halves
-        string left  = perm_key.substr(0, 28);
-        string right = perm_key.substr(28, 28);
-        for(int i = 0; i < 16; i++){
-            // 3.1. For rounds 1, 2, 9, 16 the key_chunks are shifted by one.
-            if(i == 0 || i == 1 || i == 8 || i == 15 ){
-                left = shift_left_once(left);
-                right = shift_left_once(right);
-            }
-                // 3.2. For other rounds, the key_chunks are shifted by two
-            else {
-                left = shift_left_twice(left);
-                right = shift_left_twice(right);
-            }
-
-            // Combining the two chunks
-            string combined_key = left + right;
-            string round_key;
-            // Using the PC2 table to transpose the key bits
-            for (int j : pc2) {
-                round_key += combined_key[j - 1];
-            }
-            roundKeys_.push_back(round_key);
-            count++;
-            if (count == round) break;
-        }
-    }
-}
-
-
-string ECB::shift_left_once(string key_chunk){
-    string shifted;
-
-    for(int i = 1; i < 28; i++){
-        shifted += key_chunk[i];
-    }
-    shifted += key_chunk[0];
-
-    return shifted;
-}
-
-
-string ECB::shift_left_twice(string key_chunk) {
-    string shifted;
-
-    for(int i = 0; i < 2; i++){
-        for(int j = 1; j < 28; j++){
-            shifted += key_chunk[j];
-        }
-        shifted += key_chunk[0];
-        key_chunk = shifted;
-        shifted = "";
-    }
-
-    return key_chunk;
 }
 
 
@@ -240,15 +168,4 @@ string ECB::Feistel(unsigned int round, const string& bin, const vector<string>&
 
     return ciphertext;
 }
-
-
-// TODO: DECRYPTION FIELD
-void ECB::generateReverseRoundKeys(const vector<string> &rkv, int round) {
-    int i = round - 1;
-    while(i >= 0) {
-        reverseRoundKeys_.push_back(rkv[i]);
-        i--;
-    }
-}
-
 

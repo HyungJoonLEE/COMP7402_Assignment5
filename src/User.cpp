@@ -16,16 +16,13 @@ void User::setEnvironment() {
         }
         setDataType();
     }
-    else { // decrypt mode
+    else { // TODO: decrypt
         setRoundNum();
-        if (roundNum_ == 8) {
-            if (!wasPredefinedRoundKeys())
-                setMainKey();
-            else
-                setPredefinedRoundKeys();
-        }
-        else {
+        setRoundKeyOption();
+        if (keyFlag_ != PRE_DEFINED)
             setMainKey();
+        if (mode_ == CBC_) {
+            setIV();
         }
         setInFile();
         setOutFile();
@@ -163,6 +160,7 @@ void User::setRoundNum() {
 
 void User::setRoundKeyOption() {
     string n;
+
     while(true) {
         cout << "< Setting Round key option >\n"
                 "Round key option\n"
@@ -292,28 +290,22 @@ void User::setOutFile() {
 }
 
 
-bool User::wasPredefinedRoundKeys() {
-    string n;
+void User::setIV() {
     while(true) {
-        cout << "< Checking predefined round keys >\n"
-                "Did you use predefined round keys?\n"
-                "1. No (program will generate for you based on your main Key)\n"
-                "2. Yes" << endl;
-        cout << ">> ";
-        getline(cin, n);
+        cout << "< Initialize Vector Setting >\n"
+                "Type Initialize Vector (length must be 8):\n"
+                ">> ";
 
-        if (n == "1") {
-            keyFlag_ = keyFlag::DEFAULT;
-            cout << "========== Default selected \n" << endl;
-            return false;
-        }
-        if (n == "2") {
-            keyFlag_ = keyFlag::PRE_DEFINED;
-            cout << "========== Predefined selected \n" << endl;
-            return true;
+        getline(cin, iv_);
+        if (iv_.length() != static_cast<size_t>(8)) {
+            cout << "Invalid Main key. Please enter a key of length : 8\n"<< endl;
+            cin.clear();
         }
         else {
-            cout << "Invalid input\n" << endl;
+            cout << "========== Generated initialize vector ASCII: " << iv_ << "\n" << endl;
+            string binKey = strToBin(mainKey_);
+            iv_ = binKey;
+            break;
         }
     }
 }
@@ -328,7 +320,6 @@ string User::getMainKey() const { return mainKey_; }
 
 int User::getRoundNum() const { return roundNum_; }
 int User::getKeyFlag() const { return keyFlag_; }
-vector<string> User::getRoundKeys() { return roundKeys_; }
 
 
 

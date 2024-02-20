@@ -29,6 +29,7 @@ protected:
     int keyFlag_;
     int roundNum_;
     string mainKey_;
+    string iv_;
     vector<string> roundKeys_;
 
     void generateRandomKey();
@@ -43,8 +44,8 @@ protected:
     void setDataType();
     void setInFile();
     void setOutFile();
-
     void setPredefinedRoundKeys();
+    void setIV();
 public:
     void setEnvironment();
 

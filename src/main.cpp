@@ -6,35 +6,29 @@ int main() {
     User user;
     user.setEnvironment();
 
-    ECB *ecb = new ECB();
+
+
 //    CBC *cbc = new CBC();
 
     if (user.isEncryption()) {
-        switch (user.getMode()) {
-            case encryptMode::ECB_:
-                ecb->processEncrypt(user);
-                break;
-            case encryptMode::CBC_:
-
-                break;
-            default:
-                cout << "Shouldn't get here" << endl;
-                break;
+        if (user.getMode() == encryptMode::ECB_) {
+            ECB *ecb = new ECB();
+            ecb->processEncrypt(user);
+            delete ecb;
+        }
+        if (user.getMode() == encryptMode::CBC_) {
+            // TODO: CBC Encrypt
         }
     } else {  // Decrypt mode
-        switch (user.getMode()) {
-            case encryptMode::ECB_:
-                ecb->processDecrypt(user);
-                break;
-            default:
-                cout << "Shouldn't get here" << endl;
-                break;
+        if (user.getMode() == encryptMode::ECB_) {
+            ECB *ecb = new ECB();
+            ecb->processDecrypt(user);
+            delete ecb;
+        }
+        if (user.getMode() == encryptMode::CBC_) {
+            // TODO: CBC Decrypt
         }
     }
-
-
-    delete ecb;
-//    delete cbc;
 
     return 0;
 }
