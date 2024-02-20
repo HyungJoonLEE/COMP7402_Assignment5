@@ -26,14 +26,15 @@ public:
     Feistel();
     void initializeData(User& u);
     void initializeRoundKeys(User& u, Key& k);
+    static string feistel (unsigned int round, const string& bin, const vector<string>& rk);
     void ECBencrypt(User& u);
     void ECBdecrypt(User& u);
-
-    static string feistel(unsigned int round,  const string& bin, const vector<string>& rk);
+    void CBCencrypt(User& u);
+    void CBCdecrypt(User& u);
 };
 
 
-// The initial permutation table
+// Initial permutation table
 static int initial_permutation[64] = {
         58,50,42,34,26,18,10,2,
         60,52,44,36,28,20,12,4,
@@ -44,7 +45,8 @@ static int initial_permutation[64] = {
         61,53,45,37,29,21,13,5,
         63,55,47,39,31,23,15,7
 };
-// The expansion table
+
+// Expansion table
 static int expansion_table[48] = {
         32,1,2,3,4,5,4,5,
         6,7,8,9,8,9,10,11,
@@ -55,10 +57,8 @@ static int expansion_table[48] = {
 };
 
 
-// The substitution boxes. The should contain values
-// from 0 to 15 in any order.
-static int substition_boxes[8][4][16]=
-        {{
+// SUBSTITUTION BOX
+static int substitution_boxes[8][4][16]={{
                  14,4,13,1,2,15,11,8,3,10,6,12,5,9,0,7,
                  0,15,7,4,14,2,13,1,10,6,12,11,9,5,3,8,
                  4,1,14,8,13,6,2,11,15,12,9,7,3,10,5,0,
@@ -109,7 +109,7 @@ static int substition_boxes[8][4][16]=
         };
 
 
-// The permutation table
+// PERMUTATION TABLE
 static int permutation_tab[32] = {
         16,7,20,21,29,12,28,17,
         1,15,23,26,5,18,31,10,
@@ -118,7 +118,7 @@ static int permutation_tab[32] = {
 };
 
 
-// The inverse permutation table
+// INVERSE PERMUTATION TABLE
 static int inverse_permutation[64]= {
         40,8,48,16,56,24,64,32,
         39,7,47,15,55,23,63,31,

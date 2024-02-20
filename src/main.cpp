@@ -12,14 +12,14 @@ int main() {
             f->ECBencrypt(user);
         }
         if (user.getMode() == encryptMode::CBC_) {
-            // TODO: CBC Encrypt
+            f->CBCencrypt(user);
         }
     } else {  // Decrypt mode
         if (user.getMode() == encryptMode::ECB_) {
             f->ECBdecrypt(user);
         }
         if (user.getMode() == encryptMode::CBC_) {
-            // TODO: CBC Decrypt
+            f->CBCdecrypt(user);
         }
     }
 

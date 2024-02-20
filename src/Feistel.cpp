@@ -80,6 +80,84 @@ void Feistel::ECBdecrypt(User &u) {
 }
 
 
+void Feistel::CBCencrypt(User& u) {
+    Key mkey;
+    int padding;
+    string iv;
+
+    // Input data plain text or file
+    initializeData(u);
+
+    padding = addPadding(hexdata_);
+    bindata_ = hexToBin(hexdata_);
+
+    // Key gen
+    initializeRoundKeys(u, mkey);
+
+    // Feistel process
+    iv = u.getIV();
+    for (int i = 0; i < bindata_.length(); i += 64) {
+        string bin = bindata_.substr(i, 64);
+        string newbin = XOR_binary(bin, iv);
+        string cipherBin = feistel(u.getRoundNum(), newbin, mkey.getRK());
+        if (i + 64 >= bindata_.length() && !isTxt(u.getOutFile())) {
+            cutLastPadding(cipherBin, padding * 4);
+        }
+        iv = cipherBin;
+        appendToFile(u.getOutFile(), binToHex(cipherBin));
+    }
+
+    // Process DD
+    if (!u.getInFile().empty() && !isTxt(u.getInFile())) {
+        runDD(u.getInFile(), u.getOutFile());
+    }
+}
+
+
+void Feistel::CBCdecrypt(User &u) {
+    Key mkey;
+    int padding;
+    string iv;
+
+    initializeRoundKeys(u, mkey);
+
+    hexdata_ = readFile(u.getInFile());
+    if (!isTxt(u.getInFile())) {
+        padding = addPadding(hexdata_);
+    }
+    bindata_ = hexToBin(hexdata_);
+
+    iv = u.getIV();
+
+    for (int i = 0; i < bindata_.length(); i += 64) {
+        string bin = bindata_.substr(i, 64);
+        string beforeIv = feistel(u.getRoundNum(), bin, mkey.getRRK());
+        string decryptBin = XOR_binary(beforeIv, iv);
+        iv = beforeIv;
+
+        // If data was from .txt file
+        if (bin.size() <= 64 && isTxt(u.getInFile())) {
+            decryptBin =  removeTrailingZeros(decryptBin);
+        }
+
+        // If data was from other file
+        if (i + 64 >= bindata_.length() && !isTxt(u.getInFile())) {
+            cutLastPadding(decryptBin, padding * 4);
+        }
+
+        if (isTxt(u.getInFile())) {
+            appendToFile(u.getOutFile(), hexToASCII(binToHex(decryptBin)));
+        }
+        else {
+            appendToFile(u.getOutFile(), binToHex(decryptBin));
+        }
+    }
+    if (!isTxt(u.getInFile())) {
+        runDD(u.getInFile(), u.getOutFile());
+    }
+}
+
+
 string Feistel::feistel(unsigned int round, const string& bin, const vector<string>& rk) {
 
     // Permutation1 appliex
@@ -121,7 +199,7 @@ string Feistel::feistel(unsigned int round, const string& bin, const vector<stri
 
             int row = binToDec(row1);
             int col = binToDec(col1);
-            int val = substition_boxes[j][row][col];
+            int val = substitution_boxes[j][row][col];
             res += decToBin(val);
         }
 

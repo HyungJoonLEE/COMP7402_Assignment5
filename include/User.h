@@ -57,8 +57,7 @@ public:
     int getRoundNum() const;
     int getKeyFlag() const;
     string getMainKey() const;
-    vector<string> getRoundKeys();
-    bool wasPredefinedRoundKeys();
+    string getIV() const;
 };
 
 

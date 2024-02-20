@@ -4,9 +4,9 @@
 void User::setEnvironment() {
     setEncryptDecrypt();
     setMode();
-    if (mode_ == CBC_) setIV();
     setRoundNum();
     setRoundKeyOption();
+    if (mode_ == CBC_) setIV();
     if (keyFlag_ != PRE_DEFINED) setMainKeyOption();
     if (encryptFlag_) setDataType();
     else {
@@ -289,8 +289,8 @@ void User::setIV() {
         }
         else {
             cout << "========== Generated initialize vector ASCII: " << iv_ << "\n" << endl;
-            string binKey = strToBin(mainKey_);
-            iv_ = binKey;
+            string binIv = strToBin(iv_);
+            iv_ = binIv;
             break;
         }
     }
@@ -303,7 +303,7 @@ string User::getInFile() const { return inFile_; }
 string User::getOutFile() const { return outFile_; }
 bool User::isPlainTextMode() const { return ptMode_; }
 string User::getMainKey() const { return mainKey_; }
-
+string User::getIV() const { return iv_; }
 int User::getRoundNum() const { return roundNum_; }
 int User::getKeyFlag() const { return keyFlag_; }
 
