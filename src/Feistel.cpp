@@ -133,7 +133,7 @@ void Feistel::CBCdecrypt(User &u) {
         string bin = bindata_.substr(i, 64);
         string beforeIv = feistel(u.getRoundNum(), bin, mkey.getRRK());
         string decryptBin = XOR_binary(beforeIv, iv);
-        iv = beforeIv;
+        iv = bin;
 
         // If data was from .txt file
         if (bin.size() <= 64 && isTxt(u.getInFile())) {
