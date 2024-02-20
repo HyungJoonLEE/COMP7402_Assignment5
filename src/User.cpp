@@ -4,26 +4,12 @@
 void User::setEnvironment() {
     setEncryptDecrypt();
     setMode();
-    if (encryptFlag_) {
-        if (mode_ == ECB_) {
-            setRoundNum();
-            setRoundKeyOption();
-            if (keyFlag_ != PRE_DEFINED)
-                setMainKeyOption();
-        }
-        if (mode_ == CBC_) {
-
-        }
-        setDataType();
-    }
-    else { // TODO: decrypt
-        setRoundNum();
-        setRoundKeyOption();
-        if (keyFlag_ != PRE_DEFINED)
-            setMainKey();
-        if (mode_ == CBC_) {
-            setIV();
-        }
+    if (mode_ == CBC_) setIV();
+    setRoundNum();
+    setRoundKeyOption();
+    if (keyFlag_ != PRE_DEFINED) setMainKeyOption();
+    if (encryptFlag_) setDataType();
+    else {
         setInFile();
         setOutFile();
     }
