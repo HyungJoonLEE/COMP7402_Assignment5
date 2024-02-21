@@ -11,12 +11,10 @@ set(SOURCE_DIR  "${CMAKE_CURRENT_SOURCE_DIR}/src")
 file(GLOB_RECURSE PROJECT_FILES
         "${INCLUDE_DIR}/*.h"
         "${SOURCE_DIR}/*.cpp"
-        "${SOURCE_DIR}/*.c"
         )
 
 add_executable("Feistel" ${PROJECT_FILES})
 
 target_include_directories("Feistel" PRIVATE ${INCLUDE_DIR})
-#target_link_libraries(${PROJECT_NAME} PRIVATE ssl crypto)
 target_compile_features("Feistel" PRIVATE cxx_std_17)
 

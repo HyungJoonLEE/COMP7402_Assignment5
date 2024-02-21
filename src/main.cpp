@@ -10,9 +10,11 @@ int main() {
     if (user.isEncryption()) {
         if (user.getMode() == encryptMode::ECB_) {
             f->ECBencrypt(user);
+            if (!user.getInFile().empty()) printDifferenceRate(user.getInFile(), user.getOutFile());
         }
         if (user.getMode() == encryptMode::CBC_) {
             f->CBCencrypt(user);
+            if (!user.getInFile().empty()) printDifferenceRate(user.getInFile(), user.getOutFile());
         }
     } else {  // Decrypt mode
         if (user.getMode() == encryptMode::ECB_) {

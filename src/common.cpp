@@ -9,6 +9,11 @@ vector<string> PREDEFINED_ROUND_KEYS {"0xdddddddd", "0xeeeeeeee",
                                       "0xeeeeeeee", "0xffffffff"};
 
 
+unordered_map<string, int> fileType {
+        {"bmp", 54},
+        {"png", 33}
+};
+
 
 string hexCharToBin(char hexChar) {
     switch(hexChar) {
@@ -71,12 +76,11 @@ string XOR_binary(const string& a, const string& b) {
 
 string strToHex(const string& input) {
     stringstream hexStream;
-    // Iterate over each character in the string
+
     for (unsigned char c : input) {
-        // Convert the character's ASCII value to hexadecimal
         hexStream << hex << setw(2) << setfill('0') << static_cast<int>(c);
     }
-    // Return the hexadecimal string
+
     return hexStream.str();
 }
 
@@ -85,17 +89,16 @@ string keyHexToBinary(const string& hex, bool padTo64) {
     string binaryString;
     for (size_t i = 0; i < hex.length(); ++i) {
         char c = hex[i];
-        // Correctly calculate the value for both uppercase and lowercase hex digits
+
         int value = (c >= '0' && c <= '9') ? (c - '0') : (tolower(c) - 'a' + 10);
         for (int j = 3; j >= 0; j--) {
             binaryString.push_back(((value >> j) & 1) ? '1' : '0');
         }
     }
 
-    // Correct the padding logic
     if (padTo64 && binaryString.length() < 64) {
-        string padded(64 - binaryString.length(), '0'); // Calculate correct number of zeros needed
-        binaryString = padded + binaryString; // Prepend zeros to make the binary string 64 bits long
+        string padded(64 - binaryString.length(), '0');
+        binaryString = padded + binaryString;
     }
     return binaryString;
 }
@@ -176,8 +179,10 @@ string readPlainText(const string& prompt) {
 string readFile(const string& filename) {
     if (isTxt(filename)) {
         ifstream file(filename);
-        string line;
-        string data;
+        string line, data;
+
+        line.reserve(2000000);
+        data.reserve(2000000);
 
         if (!file.is_open()) {
             cerr << "Failed to open file: " << filename << endl;
@@ -229,8 +234,8 @@ bool isTxt(const string& filename) {
 string hexToASCII(const string& hexStr) {
     string asciiStr;
     for (size_t i = 0; i < hexStr.length(); i += 2) {
-        string part = hexStr.substr(i, 2); // Get two hexadecimal digits
-        char ch = static_cast<char>(stoi(part, nullptr, 16)); // Convert to char
+        string part = hexStr.substr(i, 2);
+        char ch = static_cast<char>(stoi(part, nullptr, 16));
         asciiStr += ch;
     }
     return asciiStr;
@@ -239,13 +244,11 @@ string hexToASCII(const string& hexStr) {
 
 string removeTrailingZeros(string binStr) {
     string result;
-    string pattern = "00000000"; // Pattern to remove
+    string pattern = "00000000"; // 0s to remove
     for (size_t i = 0; i < binStr.length(); ) {
-        // If we find a sequence of eight '0's, we skip it
         if (i + 8 <= binStr.length() && binStr.substr(i, 8) == pattern) {
-            i += 8; // Move past this block of '0's
+            i += 8;
         } else {
-            // Otherwise, copy the current character to the result
             result += binStr[i];
             i++;
         }
@@ -275,72 +278,14 @@ void printRoundKeys(vector<string> rks) {
 
 
 void runDD(const string& originFileName, const string& encryptedFileName) {
-    string command = "dd if=" + originFileName + " of=" + encryptedFileName + " bs=1 count=54 conv=notrunc";
+    int hdrLen = fileType[getFileExtension(originFileName)];
+    string command = "dd if=" + originFileName + " of=" + encryptedFileName +
+            " bs=1 count=" + to_string(hdrLen) + " conv=notrunc";
     int status = system(command.c_str());
     if (status != 0) {
         cerr << "Command failed with status: " << status << endl;
     }
-}
-
-
-void readBMPHeader(ifstream& file, BMPHeader& bmpHeader, DIBHeader& dibHeader) {
-    file.read(reinterpret_cast<char*>(&bmpHeader.file_type), sizeof(bmpHeader.file_type));
-    file.read(reinterpret_cast<char*>(&bmpHeader.file_size), sizeof(bmpHeader.file_size));
-    file.read(reinterpret_cast<char*>(&bmpHeader.reserved1), sizeof(bmpHeader.reserved1));
-    file.read(reinterpret_cast<char*>(&bmpHeader.reserved2), sizeof(bmpHeader.reserved2));
-    file.read(reinterpret_cast<char*>(&bmpHeader.offset_data), sizeof(bmpHeader.offset_data));
-
-    file.read(reinterpret_cast<char*>(&dibHeader), sizeof(dibHeader));
-}
-
-int calculatePadding(int width, int bitsPerPixel) {
-    int lineBytes = (width * bitsPerPixel + 7) / 8;
-    int padding = (4 - (lineBytes % 4)) % 4;
-    return padding;
-}
-
-
-void changeBMPRowPadding(const string& inputFileName, const string& outputFileName) {
-    ifstream inputFile(inputFileName, ios::binary);
-    ofstream outputFile(outputFileName, ios::binary);
-
-    if (!inputFile.is_open() || !outputFile.is_open()) {
-        cerr << "Could not open file(s)." << endl;
-        return;
-    }
-
-    BMPHeader bmpHeader;
-    DIBHeader dibHeader;
-    readBMPHeader(inputFile, bmpHeader, dibHeader);
-
-    // Write the read headers to the output file
-    outputFile.write(reinterpret_cast<const char*>(&bmpHeader), sizeof(bmpHeader));
-    outputFile.write(reinterpret_cast<const char*>(&dibHeader), sizeof(dibHeader));
-
-    // Calculate padding
-    int padding = calculatePadding(dibHeader.width, dibHeader.bit_count);
-    int newPadding = (4 - ((dibHeader.width * dibHeader.bit_count / 8) % 4)) % 4;
-    vector<char> paddingBytes(newPadding, 0x00); // New padding bytes
-
-    // Skip to the pixel data
-    inputFile.seekg(bmpHeader.offset_data, ios::beg);
-    outputFile.seekp(bmpHeader.offset_data, ios::beg);
-
-    // For each row, read it, skip the original padding, write it, and add new padding
-    int rowSize = (dibHeader.width * dibHeader.bit_count + 7) / 8;
-    vector<char> row(rowSize);
-
-    for (int y = 0; y < dibHeader.height; ++y) {
-        inputFile.read(row.data(), row.size());
-        outputFile.write(row.data(), row.size());
-        if (newPadding > 0) {
-            outputFile.write(paddingBytes.data(), paddingBytes.size());
-        }
-        inputFile.seekg(padding, ios::cur); // Skip original padding
-    }
-
-    inputFile.close();
-    outputFile.close();
+    cout << endl;
 }
 
 
@@ -352,14 +297,117 @@ int hexCharToValue(char hexChar) {
 }
 
 
-
 void cutLastPadding(string& binary, int n) {
-    if (n <= 0) return; // If n is not positive, do nothing
+    if (n <= 0) return;
 
-    // Ensure we do not try to erase more characters than the string contains
     if (n > static_cast<int>(binary.size())) {
-        binary.clear(); // If n is larger than the string length, clear the string
-    } else {
-        binary.erase(binary.size() - n); // Erase the last n characters
+        binary.clear();
+    }
+    else {
+        binary.erase(binary.size() - n);
+    }
+}
+
+
+string getFileExtension(const string& filename) {
+    size_t dotPos = filename.find_last_of('.');
+
+    if (dotPos != string::npos) {
+        string ext = filename.substr(dotPos + 1);
+        return ext;
+    }
+    else
+        return "";
+}
+
+
+void printDifferenceRate(const string& inFile, const string& outFile) {
+    int count;
+    unsigned long len;
+
+    ifstream file1(inFile);
+    ifstream file2(outFile);
+    string line1, line2, data1, data2, bin1, bin2;
+
+    if (isTxt(inFile)) {
+        if (!file1.is_open()) {
+            cerr << "Failed to open file: " << inFile << endl;
+        }
+
+        if (!file2.is_open()) {
+            cerr << "Failed to open file: " << inFile << endl;
+        }
+
+        line1.reserve(2000000);
+        line2.reserve(2000000);
+        bin1.reserve(2000000);
+        data1.reserve(2000000);
+        data2.reserve(2000000);
+        bin2.reserve(2000000);
+
+
+        // Read file1
+        while (getline(file1, line1)) {
+            data1 += line1;
+        }
+
+        // Read file2
+        while (getline(file1, line1)) {
+            data1 += line1;
+        }
+
+        bin1 = strToBin(data1);
+        bin2 = strToBin(data2);
+        len = bin1.size();
+
+        for (int i = 0; i < len; i++) {
+            if (bin1[i] != bin2[i]) count++;
+        }
+
+        file1.close();
+        file2.close();
+
+        cout << fixed << setprecision(3) << "Difference rate: " << static_cast<float>(count) / len * 100 << "%" << endl;
+    }
+
+    else {
+        if (!file1.is_open()) {
+            cerr << "Failed to open file: " << inFile << endl;
+        }
+
+        if (!file2.is_open()) {
+            cerr << "Failed to open file: " << inFile << endl;
+        }
+
+        bin1.reserve(2000000);
+        bin2.reserve(2000000);
+
+        vector<unsigned char> buffer1(istreambuf_iterator<char>(file1), {});
+        vector<unsigned char> buffer2(istreambuf_iterator<char>(file2), {});
+
+        stringstream hexStream1;
+        stringstream hexStream2;
+
+        for (unsigned char byte : buffer1) {
+            hexStream1 << hex << setw(2) << setfill('0') << static_cast<int>(byte);
+        }
+
+        for (unsigned char byte : buffer2) {
+            hexStream2 << hex << setw(2) << setfill('0') << static_cast<int>(byte);
+        }
+
+
+        bin1 = hexToBin(hexStream1.str());
+        bin2 = hexToBin(hexStream2.str());
+        len = bin1.size();
+
+        for (int i = 0; i < len; i++) {
+            if (bin1[i] != bin2[i]) count++;
+        }
+
+        file1.close();
+        file2.close();
+
+        cout << fixed << setprecision(3) << "Difference rate: " << static_cast<float>(count) / len * 100 << "%" << endl;
     }
 }

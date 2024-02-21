@@ -14,6 +14,7 @@
 #include <cctype>
 #include <cmath>
 #include <cstdint>
+#include <unordered_map>
 
 
 using namespace std;
@@ -40,26 +41,8 @@ void runDD(const string& originFileName, const string& encryptedFileName);
 void printRoundKeys(vector<string> rks);
 int hexCharToValue(char hexChar);
 void cutLastPadding(string& binary, int n);
+string getFileExtension(const string& filename);
+void printDifferenceRate(const string& inFile, const string& outFile);
 
-struct BMPHeader {
-    uint16_t file_type{0x4D42};          // File type always BM which is 0x4D42
-    uint32_t file_size{0};               // Size of the file (in bytes)
-    uint16_t reserved1{0};               // Reserved, always 0
-    uint16_t reserved2{0};               // Reserved, always 0
-    uint32_t offset_data{0};             // Start position of pixel data (bytes from the beginning of the file)
-};
-
-struct DIBHeader {
-    uint32_t size{0};                    // Size of this header (in bytes)
-    int32_t width{0};                    // width of bitmap in pixels
-    int32_t height{0};                   // width of bitmap in pixels
-    uint16_t planes{1};                  // No. of planes for the target device, this is always 1
-    uint16_t bit_count{0};               // No. of bits per pixel
-    //... other fields not used here
-};
-
-void readBMPHeader(ifstream& file, BMPHeader& bmpHeader, DIBHeader& dibHeader);
-int calculatePadding(int width, int bitsPerPixel);
-void changeBMPRowPadding(const string& inputFileName, const string& outputFileName);
 
 #endif //COMP7402_ASSIGNMENT5_COMMON_H

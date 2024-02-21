@@ -263,7 +263,7 @@ void User::setInFile() {
     cout << "Enter input file name: " << endl;
     cout << ">> ";
     getline(cin, inFile_);
-    cout << "==========  Read from: " << inFile_ << "\n" << endl;
+    cout << "========== Read from: " << inFile_ << "\n" << endl;
 }
 
 

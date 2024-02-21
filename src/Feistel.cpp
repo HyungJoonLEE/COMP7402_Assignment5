@@ -3,9 +3,9 @@
 
 
 Feistel::Feistel() {
-    data_.reserve(100000);
-    hexdata_.reserve(200000);
-    bindata_.reserve(8000000);
+    data_.reserve(3000000);
+    hexdata_.reserve(6000000);
+    bindata_.reserve(12000000);
 }
 
 
