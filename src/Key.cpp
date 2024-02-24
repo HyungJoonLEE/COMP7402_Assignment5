@@ -3,6 +3,8 @@
 
 void Key::generateRoundKeys(string key, int round, bool flag) {
     int count = 0;
+
+    // Hard coded for 0xfffffff ()
     if (flag) {
         roundKeys_.emplace_back("000000000000000011011101110111011101110111011101");
         roundKeys_.emplace_back("000000000000000011101110111011101110111011101110");

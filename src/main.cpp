@@ -3,25 +3,26 @@
 
 int main() {
     srand(static_cast<unsigned int>(time(NULL)));
-    User user;
-    user.setEnvironment();
+    User u;
+    u.setEnvironment();
     auto *f = new Feistel();
 
-    if (user.isEncryption()) {
-        if (user.getMode() == encryptMode::ECB_) {
-            f->ECBencrypt(user);
-            if (!user.getInFile().empty()) printDifferenceRate(user.getInFile(), user.getOutFile());
+    if (u.isEncryption()) {
+        if (u.getMode() == encryptMode::ECB_) {
+            f->ECBencrypt(u);
         }
-        if (user.getMode() == encryptMode::CBC_) {
-            f->CBCencrypt(user);
-            if (!user.getInFile().empty()) printDifferenceRate(user.getInFile(), user.getOutFile());
+        if (u.getMode() == encryptMode::CBC_) {
+            f->CBCencrypt(u);
         }
-    } else {  // Decrypt mode
-        if (user.getMode() == encryptMode::ECB_) {
-            f->ECBdecrypt(user);
+    } 
+    else {  // Decrypt mode
+        if (u.getMode() == encryptMode::ECB_) {
+            f->ECBdecrypt(u);
+            printDifferenceRate(u.getInFile(), u.getOutFile());
         }
-        if (user.getMode() == encryptMode::CBC_) {
-            f->CBCdecrypt(user);
+        if (u.getMode() == encryptMode::CBC_) {
+            f->CBCdecrypt(u);
+            printDifferenceRate(u.getInFile(), u.getOutFile());
         }
     }
 

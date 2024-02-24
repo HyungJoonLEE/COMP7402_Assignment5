@@ -160,10 +160,12 @@ void Feistel::CBCdecrypt(User &u) {
 
 string Feistel::feistel(unsigned int round, const string& bin, const vector<string>& rk) {
 
-    // Permutation1 appliex
     string perm;
     string txt;
-    for (int i : initial_permutation){
+
+    // Permutation1 applied
+    for (int i : initial_permutation)
+    {
         perm += bin[i - 1];
     }
 
@@ -191,9 +193,8 @@ string Feistel::feistel(unsigned int round, const string& bin, const vector<stri
         string res;
         for (int j = 0; j < 8; j++)
         {
-
             // Finding row and column index to look up the substitution box
-            string row1= xored.substr(j * 6,1) + xored.substr(j * 6 + 5,1);
+            string row1 = xored.substr(j * 6,1) + xored.substr(j * 6 + 5,1);
             string col1 = xored.substr(j * 6 + 1,1) + xored.substr(j * 6 + 2,1)
                           + xored.substr(j * 6 + 3,1) + xored.substr(j * 6 + 4,1);
 

@@ -4,7 +4,6 @@ project(COMP7402_Assignment5)
 # Include directories
 set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(SOURCE_DIR  "${CMAKE_CURRENT_SOURCE_DIR}/src")
-#set(OPENSSL_USE_STATIC_LIBS TRUE)
 
 
 # Find all source files in the src directory
