@@ -117,14 +117,13 @@ string decToBin(int decimal) {
 }
 
 
-int binToDec(string binary)
-{
+int binToDec(string binary) {
     int decimal = 0;
     int counter = 0;
     int size = binary.length();
-    for(int i = size-1; i >= 0; i--)
-    {
-        if(binary[i] == '1'){
+
+    for(int i = size-1; i >= 0; i--) {
+        if(binary[i] == '1') {
             decimal += pow(2, counter);
         }
         counter++;
@@ -181,7 +180,7 @@ string readFile(const string& filename) {
         ifstream file(filename);
         string line, data;
 
-        line.reserve(2000000);
+        line.reserve(1000000);
         data.reserve(2000000);
 
         if (!file.is_open()) {
@@ -322,92 +321,31 @@ string getFileExtension(const string& filename) {
 
 
 void printDifferenceRate(const string& inFile, const string& outFile) {
-    int count;
-    unsigned long len;
+    string data, bin1, bin2;
 
-    ifstream file1(inFile);
-    ifstream file2(outFile);
-    string line1, line2, data1, data2, bin1, bin2;
+    bin1.reserve(200000);
+    bin2.reserve(200000);
+
+    string f1 = readFile(inFile);
+    string f2 = readFile(outFile);
 
     if (isTxt(inFile)) {
-        if (!file1.is_open()) {
-            cerr << "Failed to open file: " << inFile << endl;
-        }
-
-        if (!file2.is_open()) {
-            cerr << "Failed to open file: " << inFile << endl;
-        }
-
-        line1.reserve(2000000);
-        line2.reserve(2000000);
-        bin1.reserve(2000000);
-        data1.reserve(2000000);
-        data2.reserve(2000000);
-        bin2.reserve(2000000);
-
-
-        // Read file1
-        while (getline(file1, line1)) {
-            data1 += line1;
-        }
-
-        // Read file2
-        while (getline(file1, line1)) {
-            data1 += line1;
-        }
-
-        bin1 = strToBin(data1);
-        bin2 = strToBin(data2);
-        len = bin1.size();
-
-        for (int i = 0; i < len; i++) {
-            if (bin1[i] != bin2[i]) count++;
-        }
-
-        file1.close();
-        file2.close();
-
-        cout << fixed << setprecision(3) << "Difference rate: " << static_cast<float>(count) / len * 100 << "%" << endl;
+        data = hexToASCII(f1);
+        bin1 = strToBin(data);
+        bin2 = strToBin(f2);
     }
-
     else {
-        if (!file1.is_open()) {
-            cerr << "Failed to open file: " << inFile << endl;
-        }
-
-        if (!file2.is_open()) {
-            cerr << "Failed to open file: " << inFile << endl;
-        }
-
-        bin1.reserve(2000000);
-        bin2.reserve(2000000);
-
-        vector<unsigned char> buffer1(istreambuf_iterator<char>(file1), {});
-        vector<unsigned char> buffer2(istreambuf_iterator<char>(file2), {});
-
-        stringstream hexStream1;
-        stringstream hexStream2;
-
-        for (unsigned char byte : buffer1) {
-            hexStream1 << hex << setw(2) << setfill('0') << static_cast<int>(byte);
-        }
-
-        for (unsigned char byte : buffer2) {
-            hexStream2 << hex << setw(2) << setfill('0') << static_cast<int>(byte);
-        }
-
-
-        bin1 = hexToBin(hexStream1.str());
-        bin2 = hexToBin(hexStream2.str());
-        len = bin1.size();
-
-        for (int i = 0; i < len; i++) {
-            if (bin1[i] != bin2[i]) count++;
-        }
-
-        file1.close();
-        file2.close();
-
-        cout << fixed << setprecision(3) << "Difference rate: " << static_cast<float>(count) / len * 100 << "%" << endl;
+        bin1 = hexToBin(f1);
+        bin2 = hexToBin(f2);
     }
+
+
+    float count;
+    unsigned long len = bin2.length();
+
+    for (int i = 0; i < len; i++) {
+        if (bin1[i] != bin2[i]) count++;
+    }
+
+    cout << fixed << setprecision(3) << "Difference rate: " << count / (double)len * 100 << "%" << endl;
 }
