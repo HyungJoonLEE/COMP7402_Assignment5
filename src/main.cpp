@@ -1,4 +1,3 @@
-//#include "CBC.h"
 #include "Feistel.h"
 
 int main() {

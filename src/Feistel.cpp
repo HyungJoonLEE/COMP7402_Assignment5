@@ -19,7 +19,7 @@ void Feistel::ECBencrypt(User& u) {
     padding = addPadding(hexdata_);
     bindata_ = hexToBin(hexdata_);
 
-    // Key gen
+    // Round Key generation
     initializeRoundKeys(u, mkey);
 
     // Feistel process

@@ -50,7 +50,7 @@ public:
     void setEnvironment();
 
     int getMode() const;
-    bool isEncryption();
+    bool isEncryption() const;
     string getInFile() const;
     string getOutFile() const;
     bool isPlainTextMode() const;

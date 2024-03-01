@@ -296,7 +296,7 @@ void User::setIV() {
 }
 
 
-bool User::isEncryption() { return encryptFlag_; }
+bool User::isEncryption() const { return encryptFlag_; }
 int User::getMode() const { return mode_; }
 string User::getInFile() const { return inFile_; }
 string User::getOutFile() const { return outFile_; }
