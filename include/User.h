@@ -58,6 +58,7 @@ public:
     int getKeyFlag() const;
     string getMainKey() const;
     string getIV() const;
+    vector<string> getRoundKeys() const;
 };
 
 

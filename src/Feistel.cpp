@@ -20,7 +20,11 @@ void Feistel::ECBencrypt(User& u) {
     bindata_ = hexToBin(hexdata_);
 
     // Round Key generation
-    initializeRoundKeys(u, mkey);
+    if (u.getKeyFlag() == USER_DEFINED) {
+        mkey.setRK(u.getRoundKeys());
+    }
+    else
+        initializeRoundKeys(u, mkey);
 
     // Feistel process
     for (int i = 0; i < bindata_.length(); i += 64) {
@@ -45,7 +49,12 @@ void Feistel::ECBdecrypt(User &u) {
     Key mkey;
     int padding;
 
-    initializeRoundKeys(u, mkey);
+    if (u.getKeyFlag() == USER_DEFINED) {
+        mkey.setRK(u.getRoundKeys());
+        mkey.generateReverseRoundKeys(mkey.getRK(), u.getRoundNum());
+    }
+    else
+        initializeRoundKeys(u, mkey);
 
     hexdata_ = readFile(u.getInFile());
     if (!isTxt(u.getInFile())) {
@@ -92,7 +101,11 @@ void Feistel::CBCencrypt(User& u) {
     bindata_ = hexToBin(hexdata_);
 
     // Key gen
-    initializeRoundKeys(u, mkey);
+    if (u.getKeyFlag() == USER_DEFINED) {
+        mkey.setRK(u.getRoundKeys());
+    }
+    else
+        initializeRoundKeys(u, mkey);
 
     // Feistel process
     iv = u.getIV();
@@ -119,7 +132,12 @@ void Feistel::CBCdecrypt(User &u) {
     int padding;
     string iv;
 
-    initializeRoundKeys(u, mkey);
+    if (u.getKeyFlag() == USER_DEFINED) {
+        mkey.setRK(u.getRoundKeys());
+        mkey.generateReverseRoundKeys(mkey.getRK(), u.getRoundNum());
+    }
+    else
+        initializeRoundKeys(u, mkey);
 
     hexdata_ = readFile(u.getInFile());
     if (!isTxt(u.getInFile())) {

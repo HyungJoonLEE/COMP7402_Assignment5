@@ -196,11 +196,10 @@ void User::setPredefinedRoundKeys() {
 
 void User::setUserRoundKeys() {
     string rk;
-
+    cout << "Round key size must be 6" << endl;
     for (int i = 0; i < roundNum_; i++) {
         cout << "Round key [" << i << "] :";
         getline(cin, rk);
-
 
         string binrk, hexrk;
         bool padTo64 = rk.find("0x") == 0;
@@ -305,6 +304,7 @@ string User::getMainKey() const { return mainKey_; }
 string User::getIV() const { return iv_; }
 int User::getRoundNum() const { return roundNum_; }
 int User::getKeyFlag() const { return keyFlag_; }
+vector<string> User::getRoundKeys() const { return roundKeys_; }
 
 
 
