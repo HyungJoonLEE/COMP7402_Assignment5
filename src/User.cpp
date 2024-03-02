@@ -7,7 +7,7 @@ void User::setEnvironment() {
     setRoundNum();
     setRoundKeyOption();
     if (mode_ == CBC_) setIV();
-    if (keyFlag_ != PRE_DEFINED) setMainKeyOption();
+    if (keyFlag_ == DEFAULT) setMainKeyOption();
     if (encryptFlag_) setDataType();
     else {
         setInFile();
