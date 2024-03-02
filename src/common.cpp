@@ -340,7 +340,7 @@ void printDifferenceRate(const string& inFile, const string& outFile) {
     }
 
 
-    float count;
+    double count;
     unsigned long len = bin2.length();
 
     for (int i = 0; i < len; i++) {
